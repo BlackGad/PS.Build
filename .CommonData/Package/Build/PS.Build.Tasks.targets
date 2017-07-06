@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	
+	<Target Name="Apply adaptations artifacts"
+	        BeforeTargets="CoreCompile"
+	        DependsOnTargets="Execute adaptations">
+		<ItemGroup>
+		
+			<Compile Include="@(_ArtifactsCompile)" />
+			<EmbeddedResource Include="@(_ArtifactsEmbeddedResource)" />
+			<EntityDeploy Include="@(_ArtifactsEntityDeploy)" />
+			<Page Include="@(_ArtifactsPage)" />
+			<Resource Include="@(_ArtifactsResource)" />
+			<AdditionalFiles Include="@(_ArtifactsAdditionalFiles)" />
+			<Content Include="@(_ArtifactsContent)" />
+			<None Include="@(_ArtifactsNone)" />
+			
+		</ItemGroup>
+	</Target>
+	
+	<Target Name="Execute adaptations"
+			DependsOnTargets="ResolveReferences">
+			
+		<AdaptationBuildTask
+			References="@(ReferencePath)" 
+			
+			PropertyProjectFile="$(MSBuildProjectFile)"			
+			PropertyPlatform="$(Platform)"
+			PropertyConfiguration="$(Configuration)"
+			
+			DirectoryIntermediate="$(IntermediateOutputPath)"
+			DirectoryProject="$(MSBuildProjectDirectory)"
+			DirectoryTarget="$(TargetDir)"
+			DirectorySolution="$(SolutionDir)"
+			
+			ItemsCompile="@(Compile)" 
+			ItemsEmbeddedResource="@(EmbeddedResource)"
+			ItemsEntityDeploy="@(EntityDeploy)"
+			ItemsPage="@(Page)"
+			ItemsResource="@(Resource)"
+			ItemsAdditionalFiles="@(AdditionalFiles)"
+			ItemsContent="@(Content)"
+			ItemsNone="@(None)">
+			
+			<Output TaskParameter="ArtifactsTemporary" ItemName="_ArtifactsTemporary" />
+			<Output TaskParameter="ArtifactsCompile" ItemName="_ArtifactsCompile" />
+			<Output TaskParameter="ArtifactsEmbeddedResource" ItemName="_ArtifactsEmbeddedResource" />
+			<Output TaskParameter="ArtifactsEntityDeploy" ItemName="_ArtifactsEntityDeploy" />
+			<Output TaskParameter="ArtifactsPage" ItemName="_ArtifactsPage" />
+			<Output TaskParameter="ArtifactsResource" ItemName="_ArtifactsResource" />
+			<Output TaskParameter="ArtifactsAdditionalFiles" ItemName="_ArtifactsAdditionalFiles" />
+			<Output TaskParameter="ArtifactsContent" ItemName="_ArtifactsContent" />
+			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
+			
+		</AdaptationBuildTask>
+		
+		<ItemGroup>
+			<FileWrites Include="@(_ArtifactsTemporary)" />
+		</ItemGroup>
+	</Target>
+	
+		
+	
+</Project>

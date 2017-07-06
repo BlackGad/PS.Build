@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>PS.Build</id>
+		<version>$version$</version>
+		<authors>Shkolka Vladimir</authors>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>MSBuild tasks for build adaptations</description>
+		<releaseNotes/>
+		<frameworkAssemblies>
+			<frameworkAssembly assemblyName="System.Runtime.Serialization"/>
+			<frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"/>
+		</frameworkAssemblies>
+		<!-- <dependencies> -->
+			<!-- <dependency id="Newtonsoft.Json" version="9.0.1" /> -->
+		<!-- </dependencies> -->
+		<references>
+			<reference file="PS.Build.dll"/>
+		</references>
+	</metadata>
+	<files>
+		<file src="Build\PS.Build.props" target="build" />
+		<file src="Build\PS.Build.targets" target="build" />
+
+		<file src="..\..\PS.Build\bin\Release\PS.Build.dll" target="lib\net461" />
+		<file src="..\..\PS.Build.Tasks\bin\Release\*.dll" target="tasks\MSBuild" />
+	</files>
+</package>
