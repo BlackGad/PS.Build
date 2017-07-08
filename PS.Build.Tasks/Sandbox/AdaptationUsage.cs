@@ -11,7 +11,7 @@ namespace PS.Build.Tasks
 
         private static MethodInfo GetPostBuildMethod(Type t)
         {
-            var method = t.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = t.GetMethod("PostBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var parameters = method?.GetParameters();
             if (parameters?.Length != 1) return null;
             if (parameters.First().ParameterType != typeof(IServiceProvider)) return null;
@@ -51,6 +51,8 @@ namespace PS.Build.Tasks
         #region Properties
 
         public SyntaxNode AssociatedSyntaxNode { get; }
+
+        public Attribute Attribute { get; set; }
         public AttributeData AttributeData { get; }
         public MethodInfo PostBuildMethod { get; set; }
 

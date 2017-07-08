@@ -1,0 +1,1 @@
+namespace Test3 { class SomeClass1 {} }

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	
-	<Target Name="Apply adaptations artifacts"
+
+	<Target Name="Apply pre build adaptations artifacts"
 	        BeforeTargets="CoreCompile"
-	        DependsOnTargets="Execute adaptations">
+	        DependsOnTargets="Execute pre build adaptations">
 		<ItemGroup>
-		
+
 			<Compile Include="@(_ArtifactsCompile)" />
 			<EmbeddedResource Include="@(_ArtifactsEmbeddedResource)" />
 			<EntityDeploy Include="@(_ArtifactsEntityDeploy)" />
@@ -14,37 +14,16 @@
 			<AdditionalFiles Include="@(_ArtifactsAdditionalFiles)" />
 			<Content Include="@(_ArtifactsContent)" />
 			<None Include="@(_ArtifactsNone)" />
-			
+
+			<FileWrites Include="@(_ArtifactsTemporary)" />
+
 		</ItemGroup>
 	</Target>
-	
-	<Target Name="Execute adaptations"
-			DependsOnTargets="ResolveReferences">
-			
-		<AdaptationBuildTask
-			References="@(ReferencePath)" 
-			
-			PropertyProjectFile="$(MSBuildProjectFile)"			
-			PropertyPlatform="$(Platform)"
-			PropertyConfiguration="$(Configuration)"
-			PropertyRootNamespace="$(RootNamespace)"
-			
-			DirectoryIntermediate="$(IntermediateOutputPath)"
-			DirectoryProject="$(MSBuildProjectDirectory)"
-			DirectoryTarget="$(TargetDir)"
-			DirectorySolution="$(SolutionDir)"
-			
-			ItemsCompile="@(Compile)" 
-			ItemsEmbeddedResource="@(EmbeddedResource)"
-			ItemsEntityDeploy="@(EntityDeploy)"
-			ItemsPage="@(Page)"
-			ItemsResource="@(Resource)"
-			ItemsAdditionalFiles="@(AdditionalFiles)"
-			ItemsContent="@(Content)"
-			ItemsNone="@(None)"
-      
-      OptionDebug="$(AdaptationOptionDebug)">
-			
+
+	<Target Name="Execute pre build adaptations"
+	        DependsOnTargets="Initialize adaptations">
+
+		<PreBuildAdaptationExecutionTask>
 			<Output TaskParameter="ArtifactsTemporary" ItemName="_ArtifactsTemporary" />
 			<Output TaskParameter="ArtifactsCompile" ItemName="_ArtifactsCompile" />
 			<Output TaskParameter="ArtifactsEmbeddedResource" ItemName="_ArtifactsEmbeddedResource" />
@@ -54,14 +33,45 @@
 			<Output TaskParameter="ArtifactsAdditionalFiles" ItemName="_ArtifactsAdditionalFiles" />
 			<Output TaskParameter="ArtifactsContent" ItemName="_ArtifactsContent" />
 			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
-			
-		</AdaptationBuildTask>
-		
-		<ItemGroup>
-			<FileWrites Include="@(_ArtifactsTemporary)" />
-		</ItemGroup>
+		</PreBuildAdaptationExecutionTask>
+
 	</Target>
 	
+	<Target Name="Execute post build adaptations"
+			AfterTargets="AfterBuild"
+	        DependsOnTargets="Initialize adaptations">
+
+		<PostBuildAdaptationExecutionTask/>
 		
-	
+	</Target>
+
+	<Target Name="Initialize adaptations"
+			DependsOnTargets="ResolveReferences">
+
+		<InitializeAdaptationBuildTask
+			References="@(ReferencePath)" 
+
+			PropertyProjectFile="$(MSBuildProjectFile)"			
+			PropertyPlatform="$(Platform)"
+			PropertyConfiguration="$(Configuration)"
+			PropertyRootNamespace="$(RootNamespace)"
+
+			DirectoryIntermediate="$(IntermediateOutputPath)"
+			DirectoryProject="$(MSBuildProjectDirectory)"
+			DirectoryTarget="$(TargetDir)"
+			DirectorySolution="$(SolutionDir)"
+
+			ItemsCompile="@(Compile)" 
+			ItemsEmbeddedResource="@(EmbeddedResource)"
+			ItemsEntityDeploy="@(EntityDeploy)"
+			ItemsPage="@(Page)"
+			ItemsResource="@(Resource)"
+			ItemsAdditionalFiles="@(AdditionalFiles)"
+			ItemsContent="@(Content)"
+			ItemsNone="@(None)"
+
+			OptionDebug="$(AdaptationOptionDebug)"/>
+
+	</Target>
+
 </Project>

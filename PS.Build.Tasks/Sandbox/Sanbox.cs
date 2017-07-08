@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using PS.Build.Services;
 
 namespace PS.Build.Tasks
 {
@@ -10,7 +11,7 @@ namespace PS.Build.Tasks
 
         #region Constructors
 
-        public Sanbox()
+        public Sanbox(IExplorer explorer)
         {
             var domainSetup = new AppDomainSetup
             {
@@ -18,8 +19,23 @@ namespace PS.Build.Tasks
                 ConfigurationFile = Assembly.GetExecutingAssembly().Location + ".config"
             };
 
-            _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
+            try
+            {
+                _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
+                Client = Create<SandboxClient>(explorer);
+            }
+            catch
+            {
+                AppDomain.Unload(_appDomain);
+                throw;
+            }
         }
+
+        #endregion
+
+        #region Properties
+
+        public SandboxClient Client { get; }
 
         #endregion
 

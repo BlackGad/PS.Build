@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Types;
 
-namespace PS.Build.Tasks
+namespace PS.Build.Tasks.Services
 {
     public class Item : MarshalByRefObject,
                         IItem

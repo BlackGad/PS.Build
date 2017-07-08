@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using PS.Build.Tasks.Extensions;
 
-namespace PS.Build.Tasks
+namespace PS.Build.Tasks.Services
 {
     public class ServiceProvider : IServiceProvider
     {

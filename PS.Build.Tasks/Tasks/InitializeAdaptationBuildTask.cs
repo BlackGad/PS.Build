@@ -11,15 +11,12 @@ using PS.Build.Tasks.Services;
 using PS.Build.Types;
 using Logger = PS.Build.Tasks.Services.Logger;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Local
-
 namespace PS.Build.Tasks
 {
-    public class AdaptationBuildTask : Task
+    public class InitializeAdaptationBuildTask : Task
     {
         #region Constants
 
-        private static readonly Dictionary<BuildItem, PropertyInfo> ArtifactsProperties;
         private static readonly Dictionary<BuildDirectory, PropertyInfo> DirectoryProperties;
         private static readonly Dictionary<BuildItem, PropertyInfo> ItemsProperties;
         private static readonly Dictionary<BuildProperty, PropertyInfo> PropertiesProperties;
@@ -54,16 +51,12 @@ namespace PS.Build.Tasks
 
         #region Constructors
 
-        static AdaptationBuildTask()
+        static InitializeAdaptationBuildTask()
         {
-            var type = typeof(AdaptationBuildTask);
+            var type = typeof(InitializeAdaptationBuildTask);
             ItemsProperties = Enum.GetValues(typeof(BuildItem))
                                   .OfType<BuildItem>()
                                   .ToDictionary(v => v, v => type.GetProperty($"Items{v}"));
-
-            ArtifactsProperties = Enum.GetValues(typeof(BuildItem))
-                                      .OfType<BuildItem>()
-                                      .ToDictionary(v => v, v => type.GetProperty($"Artifacts{v}"));
 
             DirectoryProperties = Enum.GetValues(typeof(BuildDirectory))
                                       .OfType<BuildDirectory>()
@@ -77,33 +70,6 @@ namespace PS.Build.Tasks
         #endregion
 
         #region Properties
-
-        [Output]
-        public ITaskItem[] ArtifactsAdditionalFiles { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsCompile { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsContent { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsEmbeddedResource { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsEntityDeploy { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsNone { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsPage { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsResource { get; private set; }
-
-        [Output]
-        public ITaskItem[] ArtifactsTemporary { get; private set; }
 
         [Required]
         public string DirectoryIntermediate { get; set; }
@@ -165,6 +131,7 @@ namespace PS.Build.Tasks
         public override bool Execute()
         {
             if (!Debugger.IsAttached && OptionDebug) Debugger.Launch();
+
             var logger = new Logger(Log);
             try
             {
@@ -200,51 +167,16 @@ namespace PS.Build.Tasks
                                             directories,
                                             properties);
 
-                using (var sandbox = new Sanbox())
-                {
-                    var sandboxClient = sandbox.Create<SandboxClient>(logger, explorer);
-                    var artifacts = sandboxClient.Execute();
-
-                    if (artifacts.Any())
-                    {
-                        logger.Debug("------------");
-                        logger.Info("Adding additional TaskItems to build");
-
-                        foreach (var builder in artifacts)
-                        {
-                            logger.Info($"+ {builder}");
-                        }
-
-                        FillOutputTaskItems(artifacts);
-                    }
-
-                    ArtifactsTemporary = artifacts.Where(a => !a.IsPermanent)
-                                                  .Select(a => new TaskItem(a.Path))
-                                                  .OfType<ITaskItem>()
-                                                  .ToArray();
-                }
+                var sandbox = new Sanbox(explorer);
+                BuildEngine4.RegisterTaskObject(typeof(Sanbox), sandbox, RegisteredTaskObjectLifetime.Build, false);
+                sandbox.Client.Initialize(logger);
             }
             catch (Exception e)
             {
-                logger.Error($"Assembly adaptation processing failed. Details: {e.GetBaseException().Message}");
+                logger.Error($"Assembly adaptation initialization failed. Details: {e.GetBaseException().Message}");
             }
 
             return !Log.HasLoggedErrors;
-        }
-
-        #endregion
-
-        #region Members
-
-        private void FillOutputTaskItems(SerializableArtifact[] artifacts)
-        {
-            var groupedArtifacts = artifacts.ToLookup(b => b.Type, b => b);
-            foreach (var group in groupedArtifacts)
-            {
-                if (!ArtifactsProperties.ContainsKey(group.Key)) continue;
-                if (ArtifactsProperties[group.Key] == null) continue;
-                ArtifactsProperties[group.Key].SetValue(this, group.Select(b => new TaskItem(b.Path, b.Metadata)).ToArray());
-            }
         }
 
         #endregion

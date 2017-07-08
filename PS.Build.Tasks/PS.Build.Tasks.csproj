@@ -133,27 +133,29 @@
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\AdaptationUsage.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\AttributeVirtualizationVisitor.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\NugetExplorer\NugetPackage.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\ServiceProvider.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Artifactory\ArtifactCache.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\NugetExplorer\NugetExplorer.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\SuspiciousAttributeSyntaxes.cs" />
-    <Compile Include="Tasks\Common\CacheManager.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Artifactory\Artifact.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Artifactory\ArtifactDependenciesBuilder.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Item.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\SerializableArtifact.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Artifactory\Artifactory.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Explorer.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\SandboxClient.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Sanbox.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\Services\Logger.cs" />
+    <Compile Include="Sandbox\AdaptationUsage.cs" />
+    <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
+    <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
+    <Compile Include="Services\ServiceProvider.cs" />
+    <Compile Include="Services\Artifactory\ArtifactCache.cs" />
+    <Compile Include="Services\NugetExplorer\NugetExplorer.cs" />
+    <Compile Include="Sandbox\SuspiciousAttributeSyntaxes.cs" />
+    <Compile Include="Sandbox\CacheManager.cs" />
+    <Compile Include="Services\Artifactory\Artifact.cs" />
+    <Compile Include="Services\Artifactory\ArtifactDependenciesBuilder.cs" />
+    <Compile Include="Services\Explorer\Item.cs" />
+    <Compile Include="Sandbox\SerializableArtifact.cs" />
+    <Compile Include="Services\Artifactory\Artifactory.cs" />
+    <Compile Include="Services\Explorer\Explorer.cs" />
+    <Compile Include="Sandbox\SandboxClient.cs" />
+    <Compile Include="Sandbox\Sanbox.cs" />
+    <Compile Include="Services\Logger.cs" />
     <Compile Include="Extensions\IOExtensions.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tasks\AdaptBuildTask\AdaptationBuildTask.cs" />
+    <Compile Include="Tasks\InitializeAdaptationBuildTask.cs" />
+    <Compile Include="Tasks\PostBuildAdaptationExecutionTask.cs" />
+    <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -171,6 +173,7 @@
       <Name>PS.Build</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

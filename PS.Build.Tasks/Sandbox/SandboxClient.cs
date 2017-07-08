@@ -7,7 +7,6 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using PS.Build.Services;
-using PS.Build.Tasks.Common;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Tasks.Services;
 using PS.Build.Types;
@@ -17,16 +16,15 @@ namespace PS.Build.Tasks
     public class SandboxClient : MarshalByRefObject
     {
         private readonly IExplorer _explorer;
-        private readonly ILogger _logger;
+        private CSharpCompilation _compilation;
+        private List<AdaptationUsage> _usages;
 
         #region Constructors
 
-        public SandboxClient(ILogger logger, IExplorer explorer)
+        public SandboxClient(IExplorer explorer)
         {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (explorer == null) throw new ArgumentNullException(nameof(explorer));
 
-            _logger = logger;
             _explorer = explorer;
 
             var assemblyReferences = _explorer.References.Select(i => i.FullPath).ToArray();
@@ -57,51 +55,59 @@ namespace PS.Build.Tasks
 
         #region Members
 
-        public SerializableArtifact[] Execute()
+        public void ExecutePostBuildAdaptations(ILogger logger)
         {
-            var adaptationTypes = SearchCompiledAdaptations();
-            if (!adaptationTypes.Any())
-            {
-                _logger.Info("Assembly references do not contains adaptation attributes.");
-                return Enumerable.Empty<SerializableArtifact>().ToArray();
-            }
+            ExecutePostBuildAdaptations(logger, _usages, _compilation);
+        }
 
-            var syntaxTrees = CreateSyntaxTrees();
-
-            var suspiciousAttributeSyntaxes = AnalyzeSyntaxForAdaptationUsages(adaptationTypes, syntaxTrees);
-            if (!suspiciousAttributeSyntaxes.Any())
-            {
-                _logger.Info("Assembly does not use any defined adaptation attribute.");
-                return Enumerable.Empty<SerializableArtifact>().ToArray();
-            }
-
-            var compilation = CreateCompilation(syntaxTrees);
-            if (compilation == null) throw new Exception("Can not create compilation");
-
-            var usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, compilation);
-            if (!usages.Any())
-            {
-                _logger.Info("Assembly does not use any defined adaptation attribute.");
-                return Enumerable.Empty<SerializableArtifact>().ToArray();
-            }
-
+        public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
+        {
             var artifacts = new List<Artifact>();
-            artifacts.AddRange(ExecuteAdaptations(usages, compilation));
+            artifacts.AddRange(ExecutePreBuildAdaptations(_usages, _compilation, logger));
 
-            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], _logger))
+            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
             {
-                HandleArtifactsContent(artifacts, cacheManager);
+                HandleArtifactsContent(artifacts, cacheManager, logger);
                 artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
             }
 
             return artifacts.Select(a => a.Serialize()).ToArray();
         }
 
-        private List<AdaptationUsage> AnalyzeSemanticForAdaptationUsages(SuspiciousAttributeSyntaxes suspiciousAttributeSyntaxes,
-                                                                         CSharpCompilation compilation)
+        public void Initialize(ILogger logger)
         {
-            _logger.Debug("------------");
-            _logger.Info("Analyzing semantic");
+            var adaptationTypes = SearchCompiledAdaptations(logger);
+            if (!adaptationTypes.Any())
+            {
+                logger.Info("Assembly references do not contains adaptation attributes.");
+                return;
+            }
+
+            var syntaxTrees = CreateSyntaxTrees();
+
+            var suspiciousAttributeSyntaxes = AnalyzeSyntaxForAdaptationUsages(adaptationTypes, syntaxTrees, logger);
+            if (!suspiciousAttributeSyntaxes.Any())
+            {
+                logger.Info("Assembly does not use any defined adaptation attribute.");
+                return;
+            }
+
+            _compilation = CreateCompilation(syntaxTrees, logger);
+            if (_compilation == null) throw new Exception("Can not create compilation");
+
+            _usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, _compilation, logger);
+            if (!_usages.Any())
+            {
+                logger.Info("Assembly does not use any defined adaptation attribute.");
+            }
+        }
+
+        private List<AdaptationUsage> AnalyzeSemanticForAdaptationUsages(SuspiciousAttributeSyntaxes suspiciousAttributeSyntaxes,
+                                                                         CSharpCompilation compilation,
+                                                                         ILogger logger)
+        {
+            logger.Debug("------------");
+            logger.Info("Analyzing semantic");
 
             var suspiciousSyntaxTrees = suspiciousAttributeSyntaxes.ToLookup(pair => pair.Key.SyntaxTree, pair => pair);
             var usages = new List<AdaptationUsage>();
@@ -117,7 +123,7 @@ namespace PS.Build.Tasks
 
                     if (resolvedType == null)
                     {
-                        _logger.Warn($"Could not resolve '{pair.Key}' type");
+                        logger.Warn($"Could not resolve '{pair.Key}' type");
                         continue;
                     }
 
@@ -128,20 +134,21 @@ namespace PS.Build.Tasks
                                                    resolvedType));
                 }
             }
-            _logger.Info($"Found {usages.Count} adaptation attribute usages");
+            logger.Info($"Found {usages.Count} adaptation attribute usages");
             foreach (var usage in usages)
             {
-                _logger.Debug($"+ Usage: {usage}");
+                logger.Debug($"+ Usage: {usage}");
             }
 
             return usages;
         }
 
         private SuspiciousAttributeSyntaxes AnalyzeSyntaxForAdaptationUsages(IEnumerable<Type> adaptationTypes,
-                                                                             IEnumerable<SyntaxTree> syntaxTrees)
+                                                                             IEnumerable<SyntaxTree> syntaxTrees,
+                                                                             ILogger logger)
         {
-            _logger.Debug("------------");
-            _logger.Info("Analyzing syntax");
+            logger.Debug("------------");
+            logger.Info("Analyzing syntax");
 
             var visitor = new AttributeVirtualizationVisitor(adaptationTypes);
             foreach (var syntaxTree in syntaxTrees)
@@ -150,23 +157,23 @@ namespace PS.Build.Tasks
             }
 
             var suspiciousAttributeSyntaxes = visitor.SuspiciousAttributeSyntaxes;
-            _logger.Info($"Found {suspiciousAttributeSyntaxes.Count} suspicious attributes");
+            logger.Info($"Found {suspiciousAttributeSyntaxes.Count} suspicious attributes");
             foreach (var pair in suspiciousAttributeSyntaxes)
             {
-                _logger.Debug($" + Syntax: {pair.Key}");
+                logger.Debug($" + Syntax: {pair.Key}");
                 foreach (var type in pair.Value)
                 {
-                    _logger.Debug($"   * Could be: {type.FullName}");
+                    logger.Debug($"   * Could be: {type.FullName}");
                 }
             }
 
             return suspiciousAttributeSyntaxes;
         }
 
-        private CSharpCompilation CreateCompilation(IEnumerable<SyntaxTree> syntaxTrees)
+        private CSharpCompilation CreateCompilation(IEnumerable<SyntaxTree> syntaxTrees, ILogger logger)
         {
-            _logger.Debug("------------");
-            _logger.Info("Creating Roslyn compilation");
+            logger.Debug("------------");
+            logger.Info("Creating Roslyn compilation");
 
             var references = _explorer.References.Select(r => MetadataReference.CreateFromFile(r.FullPath));
             return CSharpCompilation.Create(Guid.NewGuid().ToString("N"), syntaxTrees, references);
@@ -179,21 +186,84 @@ namespace PS.Build.Tasks
             return syntaxTrees;
         }
 
-        private List<Artifact> ExecuteAdaptations(List<AdaptationUsage> usages, CSharpCompilation compilation)
+        private void ExecutePostBuildAdaptations(ILogger logger, List<AdaptationUsage> usages, CSharpCompilation compilation)
         {
-            _logger.Debug("------------");
-            _logger.Info("Executing discovered adaptations");
+            if (usages.All(u => u.PreBuildMethod == null))
+            {
+                logger.Info("There is no discovered adaptations with post build instructions");
+                return;
+            }
+
+            logger.Info("Executing discovered adaptations with post build instructions");
 
             var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
 
-            var result = new List<Artifact>();
             foreach (var usage in usages)
             {
-                _logger.Debug($"Adaptation: {usage.AttributeData}");
+                logger.Debug($"Adaptation: {usage.AttributeData}");
+                var method = usage.PostBuildMethod;
+                if (method == null)
+                {
+                    logger.Debug("Adaptation does not contain void PostBuild(IServiceProvider provider) method. Skipping...");
+                    continue;
+                }
+
+                var attribute = usage.Attribute;
+                if (attribute == null)
+                {
+                    try
+                    {
+                        attribute = usage.AttributeData.CreateAttribute(usage.Type);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.Warn($"Could not create adaptation attribute. Details: {e.GetBaseException().Message}.");
+                        continue;
+                    }
+                }
+
+                try
+                {
+                    var serviceProvider = new ServiceProvider();
+                    serviceProvider.AddService(typeof(CSharpCompilation), compilation);
+                    serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
+                    serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
+                    serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
+                    serviceProvider.AddService(typeof(ILogger), logger);
+                    serviceProvider.AddService(typeof(IExplorer), _explorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
+
+                    method.Invoke(attribute, new object[] { serviceProvider });
+                }
+                catch (Exception e)
+                {
+                    logger.Error($"Adaptation failed. Details: {e.GetBaseException().Message}.");
+                }
+            }
+        }
+
+        private List<Artifact> ExecutePreBuildAdaptations(List<AdaptationUsage> usages,
+                                                          CSharpCompilation compilation,
+                                                          ILogger logger)
+        {
+            var result = new List<Artifact>();
+            if (usages.All(u => u.PreBuildMethod == null))
+            {
+                logger.Info("There is no discovered adaptations with pre build instructions");
+                return result;
+            }
+
+            logger.Info("Executing discovered adaptations with pre build instructions");
+
+            var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
+
+            foreach (var usage in usages)
+            {
+                logger.Debug($"Adaptation: {usage.AttributeData}");
                 var method = usage.PreBuildMethod;
                 if (method == null)
                 {
-                    _logger.Info("Adaptation does not contain void PreBuild(IServiceProvider provider) method. Skipping...");
+                    logger.Debug("Adaptation does not contain void PreBuild(IServiceProvider provider) method. Skipping...");
                     continue;
                 }
 
@@ -201,10 +271,11 @@ namespace PS.Build.Tasks
                 try
                 {
                     attribute = usage.AttributeData.CreateAttribute(usage.Type);
+                    usage.Attribute = attribute;
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn($"Could not create adaptation attribute. Details: {e.GetBaseException().Message}.");
+                    logger.Warn($"Could not create adaptation attribute. Details: {e.GetBaseException().Message}.");
                     continue;
                 }
 
@@ -217,7 +288,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
-                    serviceProvider.AddService(typeof(ILogger), _logger);
+                    serviceProvider.AddService(typeof(ILogger), logger);
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(IArtifactory), artifactory);
                     serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
@@ -228,19 +299,19 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"Adaptation failed. Details: {e.GetBaseException().Message}.");
+                    logger.Error($"Adaptation failed. Details: {e.GetBaseException().Message}.");
                 }
             }
             return result;
         }
 
-        private void HandleArtifactsContent(List<Artifact> artifacts, CacheManager<ArtifactCache> cacheManager)
+        private void HandleArtifactsContent(List<Artifact> artifacts, CacheManager<ArtifactCache> cacheManager, ILogger logger)
         {
             var artifactsWithContentGenerators = artifacts.Where(a => a.ContentFactory != null).ToList();
             if (!artifactsWithContentGenerators.Any()) return;
 
-            _logger.Debug("------------");
-            _logger.Info("Processing adaptation artifacts content");
+            logger.Debug("------------");
+            logger.Info("Processing adaptation artifacts content");
 
             foreach (var artifact in artifactsWithContentGenerators)
             {
@@ -258,7 +329,7 @@ namespace PS.Build.Tasks
                     }
                     else if (cache.HashCodes.SequenceEqual(currentHashCodes))
                     {
-                        _logger.Info($"+ {artifact}: Content is up to date");
+                        logger.Info($"+ {artifact}: Content is up to date");
                         continue;
                     }
 
@@ -268,22 +339,22 @@ namespace PS.Build.Tasks
                         Path.GetDirectoryName(artifact.Path).EnsureDirectoryExist();
                         File.WriteAllBytes(artifact.Path, content);
                     }
-                    _logger.Info($"+ {artifact}: Content generated");
+                    logger.Info($"+ {artifact}: Content generated");
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"Adaptation content generation failed. Details: {e.GetBaseException().Message}.");
+                    logger.Error($"Adaptation content generation failed. Details: {e.GetBaseException().Message}.");
                 }
             }
         }
 
-        private List<Type> SearchCompiledAdaptations()
+        private List<Type> SearchCompiledAdaptations(ILogger logger)
         {
             var references = _explorer.References.Select(i => i.FullPath).ToList();
             var adaptationDefinitionTypes = new List<Type>();
 
-            _logger.Debug("------------");
-            _logger.Info("Searching for compiled adaptation attributes");
+            logger.Debug("------------");
+            logger.Info("Searching for compiled adaptation attributes");
 
             var pathBanns = new List<string>
             {
@@ -311,7 +382,7 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn($"Could not load reference assembly '{reference}'. Details: {e.GetBaseException()}");
+                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {e.GetBaseException()}");
                 }
             }
 
@@ -322,10 +393,10 @@ namespace PS.Build.Tasks
                                            .Where(t => !t.IsAbstract)
                                            .ToList();
 
-            _logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");
+            logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");
             foreach (var t in adaptationTypes)
             {
-                _logger.Debug($"+ Definition: {t.FullName} in {t.Assembly.GetName().Name}");
+                logger.Debug($"+ Definition: {t.FullName} in {t.Assembly.GetName().Name}");
             }
 
             return adaptationTypes;

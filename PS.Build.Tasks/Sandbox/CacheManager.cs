@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using PS.Build.Services;
 using PS.Build.Tasks.Extensions;
 
-namespace PS.Build.Tasks.Common
+namespace PS.Build.Tasks
 {
     public class CacheManager<TPayload> : IDisposable where TPayload : class
     {
