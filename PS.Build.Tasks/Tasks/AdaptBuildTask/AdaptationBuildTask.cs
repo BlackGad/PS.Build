@@ -141,6 +141,8 @@ namespace PS.Build.Tasks
         [Required]
         public ITaskItem[] ItemsResource { get; set; }
 
+        public bool OptionDebug { get; set; }
+
         [Required]
         public string PropertyConfiguration { get; set; }
 
@@ -151,6 +153,9 @@ namespace PS.Build.Tasks
         public string PropertyProjectFile { get; set; }
 
         [Required]
+        public string PropertyRootNamespace { get; set; }
+
+        [Required]
         public ITaskItem[] References { get; set; }
 
         #endregion
@@ -159,7 +164,7 @@ namespace PS.Build.Tasks
 
         public override bool Execute()
         {
-            //if (!Debugger.IsAttached) Debugger.Launch();
+            if (!Debugger.IsAttached && OptionDebug) Debugger.Launch();
             var logger = new Logger(Log);
             try
             {
@@ -202,7 +207,7 @@ namespace PS.Build.Tasks
 
                     if (artifacts.Any())
                     {
-                        logger.Info("------------");
+                        logger.Debug("------------");
                         logger.Info("Adding additional TaskItems to build");
 
                         foreach (var builder in artifacts)

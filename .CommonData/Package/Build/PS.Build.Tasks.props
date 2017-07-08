@@ -4,6 +4,7 @@
 		<PSBuildTasksFilename>PS.Build.Tasks.dll</PSBuildTasksFilename>
 		<PSBuildTasksDir Condition="$(PSBuildTasksDir) == '' Or $(PSBuildTasksDir) == '*Undefined*'">$(MSBuildThisFileDirectory)\..\tasks\MSBuild</PSBuildTasksDir>
 		<PSBuildTasksPath>$(PSBuildTasksDir)\$(PSBuildTasksFilename)</PSBuildTasksPath>
+		<AdaptationOptionDebug>false</AdaptationOptionDebug>
 	</PropertyGroup>
 
 	<UsingTask TaskName="PS.Build.Tasks.AdaptationBuildTask" AssemblyFile="$(PSBuildTasksPath)" />

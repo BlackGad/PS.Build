@@ -16,15 +16,6 @@ namespace PS.Build.Tasks
 {
     public class SandboxClient : MarshalByRefObject
     {
-        #region Static members
-
-        private static MethodInfo GetAdaptMethod(Type t)
-        {
-            return t.GetMethod("Adapt", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        }
-
-        #endregion
-
         private readonly IExplorer _explorer;
         private readonly ILogger _logger;
 
@@ -42,12 +33,23 @@ namespace PS.Build.Tasks
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
             {
                 var queryAssemblyName = args.Name.Split(',').FirstOrDefault();
-                var resolvedAssemblyName = assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                                                                queryAssemblyName,
-                                                                                                StringComparison.InvariantCultureIgnoreCase));
-                return !string.IsNullOrWhiteSpace(resolvedAssemblyName)
-                    ? Assembly.LoadFile(resolvedAssemblyName)
-                    : null;
+                var resolved = assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
+                                                                                    queryAssemblyName,
+                                                                                    StringComparison.InvariantCultureIgnoreCase));
+                var location = Assembly.GetExecutingAssembly().Location;
+                if (string.IsNullOrEmpty(resolved))
+                {
+                    if (string.IsNullOrEmpty(location)) return null;
+                    location = Path.GetDirectoryName(location);
+                    if (string.IsNullOrEmpty(location)) return null;
+                    resolved = Directory.GetFiles(location, "*.dll")
+                                        .FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
+                                                                           queryAssemblyName,
+                                                                           StringComparison.InvariantCultureIgnoreCase));
+                }
+                if (string.IsNullOrWhiteSpace(resolved)) return null;
+
+                return Assembly.LoadFile(resolved);
             };
         }
 
@@ -74,7 +76,7 @@ namespace PS.Build.Tasks
             }
 
             var compilation = CreateCompilation(syntaxTrees);
-            if (compilation == null) throw new Exception("Can not create semantic model");
+            if (compilation == null) throw new Exception("Can not create compilation");
 
             var usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, compilation);
             if (!usages.Any())
@@ -112,6 +114,12 @@ namespace PS.Build.Tasks
                     var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
                     var resolvedType = pair.Value.FirstOrDefault(t => attributeInfo.Symbol.IsEquivalent(t));
                     var attributeData = pair.Key.ResolveAttributeData(semanticModel);
+
+                    if (resolvedType == null)
+                    {
+                        _logger.Warn($"Could not resolve '{pair.Key}' type");
+                        continue;
+                    }
 
                     usages.Add(new AdaptationUsage(semanticModel,
                                                    group.Key,
@@ -182,6 +190,13 @@ namespace PS.Build.Tasks
             foreach (var usage in usages)
             {
                 _logger.Debug($"Adaptation: {usage.AttributeData}");
+                var method = usage.PreBuildMethod;
+                if (method == null)
+                {
+                    _logger.Info("Adaptation does not contain void PreBuild(IServiceProvider provider) method. Skipping...");
+                    continue;
+                }
+
                 Attribute attribute;
                 try
                 {
@@ -195,9 +210,6 @@ namespace PS.Build.Tasks
 
                 try
                 {
-                    var method = GetAdaptMethod(usage.Type);
-                    if (method == null) throw new InvalidOperationException();
-
                     var artifactory = new Artifactory();
 
                     var serviceProvider = new ServiceProvider();
@@ -216,7 +228,7 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn($"Adaptation failed. Details: {e.GetBaseException().Message}.");
+                    _logger.Error($"Adaptation failed. Details: {e.GetBaseException().Message}.");
                 }
             }
             return result;
@@ -236,7 +248,7 @@ namespace PS.Build.Tasks
                 {
                     var currentHashCodes = artifact.Dependencies.GetDependenciesHashCodes().ToArray();
                     var cache = cacheManager.GetCached(artifact.Path);
-                    if (cache == null || !File.Exists(artifact.Path))
+                    if (cache == null || !File.Exists(artifact.Path) || !currentHashCodes.Any())
                     {
                         cacheManager.Cache(artifact.Path,
                                            new ArtifactCache
@@ -260,7 +272,7 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    _logger.Warn($"Adaptation content generation failed. Details: {e.GetBaseException().Message}.");
+                    _logger.Error($"Adaptation content generation failed. Details: {e.GetBaseException().Message}.");
                 }
             }
         }
@@ -288,18 +300,12 @@ namespace PS.Build.Tasks
                     var foundTypes = assembly.GetTypes()
                                              .Where(t => typeof(Attribute).IsAssignableFrom(t))
                                              .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
-                                             .Where(t =>
-                                             {
-                                                 var usageAttribute = t.GetCustomAttribute<AttributeUsageAttribute>() ??
-                                                                      new AttributeUsageAttribute(AttributeTargets.All);
+                                             .Where(t => t.GetCustomAttribute<AttributeUsageAttribute>()?.Inherited == false);
 
-                                                 if (usageAttribute.Inherited) return false;
-
-                                                 var adaptMethod = GetAdaptMethod(t);
-                                                 var parameters = adaptMethod?.GetParameters();
-                                                 if (parameters?.Length != 1) return false;
-                                                 return parameters.First().ParameterType == typeof(IServiceProvider);
-                                             });
+                    //var adaptMethod = GetPreBuildMethod(t);
+                    //var parameters = adaptMethod?.GetParameters();
+                    //if (parameters?.Length != 1) return false;
+                    //return parameters.First().ParameterType == typeof(IServiceProvider);
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }

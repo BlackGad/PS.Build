@@ -7,6 +7,7 @@ namespace PS.Build.Types
     {
         ProjectFile,
         Configuration,
-        Platform
+        Platform,
+        RootNamespace
     }
 }

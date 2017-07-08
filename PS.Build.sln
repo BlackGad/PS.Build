@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Package", "Package", "{FD4218ED-60F5-42CC-806E-3FD45E8B5EA0}"
 	ProjectSection(SolutionItems) = preProject
 		.CommonData\Package\PS.Build.nuspec = .CommonData\Package\PS.Build.nuspec
+		.CommonData\Package\PS.Build.Tasks.nuspec = .CommonData\Package\PS.Build.Tasks.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS.Build", "PS.Build\PS.Build.csproj", "{4503F7EF-6229-4345-9DD5-11BAD38464B1}"

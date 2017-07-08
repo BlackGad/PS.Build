@@ -4,7 +4,8 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks
 {
-    public class SerializableArtifact : MarshalByRefObject
+    [Serializable]
+    public class SerializableArtifact
     {
         #region Properties
 

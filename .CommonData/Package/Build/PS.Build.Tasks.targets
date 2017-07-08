@@ -27,6 +27,7 @@
 			PropertyProjectFile="$(MSBuildProjectFile)"			
 			PropertyPlatform="$(Platform)"
 			PropertyConfiguration="$(Configuration)"
+			PropertyRootNamespace="$(RootNamespace)"
 			
 			DirectoryIntermediate="$(IntermediateOutputPath)"
 			DirectoryProject="$(MSBuildProjectDirectory)"
@@ -40,7 +41,9 @@
 			ItemsResource="@(Resource)"
 			ItemsAdditionalFiles="@(AdditionalFiles)"
 			ItemsContent="@(Content)"
-			ItemsNone="@(None)">
+			ItemsNone="@(None)"
+      
+      OptionDebug="$(AdaptationOptionDebug)">
 			
 			<Output TaskParameter="ArtifactsTemporary" ItemName="_ArtifactsTemporary" />
 			<Output TaskParameter="ArtifactsCompile" ItemName="_ArtifactsCompile" />

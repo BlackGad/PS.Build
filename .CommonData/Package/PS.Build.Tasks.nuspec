@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>PS.Build.Tasks</id>
+		<version>$version$</version>
+		<authors>Shkolka Vladimir</authors>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>MSBuild tasks for build adaptations</description>
+		<releaseNotes/>
+	</metadata>
+	<files>
+		<file src="Build\PS.Build.Tasks.props" target="build" />
+		<file src="Build\PS.Build.Tasks.targets" target="build" />
+		
+		<file src="..\..\PS.Build.Tasks\bin\Release\*.dll" target="tasks\MSBuild" />
+	</files>
+</package>

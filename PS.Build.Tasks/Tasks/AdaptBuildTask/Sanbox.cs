@@ -4,9 +4,7 @@ using System.Reflection;
 
 namespace PS.Build.Tasks
 {
-    [Serializable]
-    public class Sanbox : MarshalByRefObject,
-                          IDisposable
+    public class Sanbox : IDisposable
     {
         private readonly AppDomain _appDomain;
 

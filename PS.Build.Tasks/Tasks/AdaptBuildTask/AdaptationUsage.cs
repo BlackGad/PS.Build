@@ -1,10 +1,34 @@
 using System;
+using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 
 namespace PS.Build.Tasks
 {
     class AdaptationUsage
     {
+        #region Static members
+
+        private static MethodInfo GetPostBuildMethod(Type t)
+        {
+            var method = t.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameters = method?.GetParameters();
+            if (parameters?.Length != 1) return null;
+            if (parameters.First().ParameterType != typeof(IServiceProvider)) return null;
+            return method;
+        }
+
+        private static MethodInfo GetPreBuildMethod(Type t)
+        {
+            var method = t.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var parameters = method?.GetParameters();
+            if (parameters?.Length != 1) return null;
+            if (parameters.First().ParameterType != typeof(IServiceProvider)) return null;
+            return method;
+        }
+
+        #endregion
+
         #region Constructors
 
         public AdaptationUsage(SemanticModel semanticModel,
@@ -18,6 +42,8 @@ namespace PS.Build.Tasks
             AssociatedSyntaxNode = associatedSyntaxNode;
             AttributeData = attributeData;
             Type = type;
+            PreBuildMethod = GetPreBuildMethod(type);
+            PostBuildMethod = GetPostBuildMethod(type);
         }
 
         #endregion
@@ -26,6 +52,9 @@ namespace PS.Build.Tasks
 
         public SyntaxNode AssociatedSyntaxNode { get; }
         public AttributeData AttributeData { get; }
+        public MethodInfo PostBuildMethod { get; set; }
+
+        public MethodInfo PreBuildMethod { get; set; }
         public SemanticModel SemanticModel { get; }
 
         public SyntaxTree SyntaxTree { get; }

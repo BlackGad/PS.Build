@@ -92,8 +92,8 @@ namespace PS.Build.Tasks.Extensions
 
         public static bool IsEquivalent(this ISymbol symbol, Type type)
         {
-            if (symbol == null) throw new ArgumentNullException(nameof(symbol));
-            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (symbol == null) return false;
+            if (type == null) return false;
 
             var typeName = symbol.ContainingType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
             var assemblyName = symbol.ContainingAssembly.Identity.Name;
