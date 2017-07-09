@@ -19,36 +19,18 @@
 
 		</ItemGroup>
 	</Target>
-
-	<Target Name="Execute pre build adaptations"
-	        DependsOnTargets="Initialize adaptations">
-
-		<PreBuildAdaptationExecutionTask>
-			<Output TaskParameter="ArtifactsTemporary" ItemName="_ArtifactsTemporary" />
-			<Output TaskParameter="ArtifactsCompile" ItemName="_ArtifactsCompile" />
-			<Output TaskParameter="ArtifactsEmbeddedResource" ItemName="_ArtifactsEmbeddedResource" />
-			<Output TaskParameter="ArtifactsEntityDeploy" ItemName="_ArtifactsEntityDeploy" />
-			<Output TaskParameter="ArtifactsPage" ItemName="_ArtifactsPage" />
-			<Output TaskParameter="ArtifactsResource" ItemName="_ArtifactsResource" />
-			<Output TaskParameter="ArtifactsAdditionalFiles" ItemName="_ArtifactsAdditionalFiles" />
-			<Output TaskParameter="ArtifactsContent" ItemName="_ArtifactsContent" />
-			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
-		</PreBuildAdaptationExecutionTask>
-
-	</Target>
 	
 	<Target Name="Execute post build adaptations"
-			AfterTargets="AfterBuild"
-	        DependsOnTargets="Initialize adaptations">
+			AfterTargets="AfterBuild">
 
 		<PostBuildAdaptationExecutionTask/>
 		
 	</Target>
 
-	<Target Name="Initialize adaptations"
+	<Target Name="Execute pre build adaptations"
 			DependsOnTargets="ResolveReferences">
 
-		<InitializeAdaptationBuildTask
+		<PreBuildAdaptationExecutionTask
 			References="@(ReferencePath)" 
 
 			PropertyProjectFile="$(MSBuildProjectFile)"			
@@ -70,8 +52,19 @@
 			ItemsContent="@(Content)"
 			ItemsNone="@(None)"
 
-			OptionDebug="$(AdaptationOptionDebug)"/>
-
+			OptionDebug="$(AdaptationOptionDebug)">
+			
+			<Output TaskParameter="ArtifactsTemporary" ItemName="_ArtifactsTemporary" />
+			<Output TaskParameter="ArtifactsCompile" ItemName="_ArtifactsCompile" />
+			<Output TaskParameter="ArtifactsEmbeddedResource" ItemName="_ArtifactsEmbeddedResource" />
+			<Output TaskParameter="ArtifactsEntityDeploy" ItemName="_ArtifactsEntityDeploy" />
+			<Output TaskParameter="ArtifactsPage" ItemName="_ArtifactsPage" />
+			<Output TaskParameter="ArtifactsResource" ItemName="_ArtifactsResource" />
+			<Output TaskParameter="ArtifactsAdditionalFiles" ItemName="_ArtifactsAdditionalFiles" />
+			<Output TaskParameter="ArtifactsContent" ItemName="_ArtifactsContent" />
+			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
+			
+		</PreBuildAdaptationExecutionTask>
 	</Target>
 
 </Project>

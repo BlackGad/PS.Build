@@ -153,9 +153,8 @@
     <Compile Include="Extensions\IOExtensions.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tasks\InitializeAdaptationBuildTask.cs" />
-    <Compile Include="Tasks\PostBuildAdaptationExecutionTask.cs" />
     <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />
+    <Compile Include="Tasks\PostBuildAdaptationExecutionTask.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

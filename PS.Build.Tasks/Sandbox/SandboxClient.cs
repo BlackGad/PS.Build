@@ -57,30 +57,32 @@ namespace PS.Build.Tasks
 
         public void ExecutePostBuildAdaptations(ILogger logger)
         {
-            ExecutePostBuildAdaptations(logger, _usages, _compilation);
+            ExecutePostBuildAdaptations(logger, _usages);
         }
+
+        //public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
+        //{
+        //    var artifacts = new List<Artifact>();
+        //    artifacts.AddRange(ExecutePreBuildAdaptations(_usages, logger));
+
+        //    using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
+        //    {
+        //        HandleArtifactsContent(artifacts, cacheManager, logger);
+        //        artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
+        //    }
+
+        //    return artifacts.Select(a => a.Serialize()).ToArray();
+        //}
 
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
         {
-            var artifacts = new List<Artifact>();
-            artifacts.AddRange(ExecutePreBuildAdaptations(_usages, _compilation, logger));
+            var result = new List<SerializableArtifact>();
 
-            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
-            {
-                HandleArtifactsContent(artifacts, cacheManager, logger);
-                artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
-            }
-
-            return artifacts.Select(a => a.Serialize()).ToArray();
-        }
-
-        public void Initialize(ILogger logger)
-        {
             var adaptationTypes = SearchCompiledAdaptations(logger);
             if (!adaptationTypes.Any())
             {
                 logger.Info("Assembly references do not contains adaptation attributes.");
-                return;
+                return result.ToArray();
             }
 
             var syntaxTrees = CreateSyntaxTrees();
@@ -89,7 +91,7 @@ namespace PS.Build.Tasks
             if (!suspiciousAttributeSyntaxes.Any())
             {
                 logger.Info("Assembly does not use any defined adaptation attribute.");
-                return;
+                return result.ToArray();
             }
 
             _compilation = CreateCompilation(syntaxTrees, logger);
@@ -99,7 +101,21 @@ namespace PS.Build.Tasks
             if (!_usages.Any())
             {
                 logger.Info("Assembly does not use any defined adaptation attribute.");
+                return result.ToArray();
             }
+
+            var artifacts = new List<Artifact>();
+            artifacts.AddRange(ExecutePreBuildAdaptations(_usages, logger));
+
+            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
+            {
+                HandleArtifactsContent(artifacts, cacheManager, logger);
+                artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
+            }
+
+            result.AddRange(artifacts.Select(a => a.Serialize()));
+
+            return result.ToArray();
         }
 
         private List<AdaptationUsage> AnalyzeSemanticForAdaptationUsages(SuspiciousAttributeSyntaxes suspiciousAttributeSyntaxes,
@@ -186,7 +202,7 @@ namespace PS.Build.Tasks
             return syntaxTrees;
         }
 
-        private void ExecutePostBuildAdaptations(ILogger logger, List<AdaptationUsage> usages, CSharpCompilation compilation)
+        private void ExecutePostBuildAdaptations(ILogger logger, List<AdaptationUsage> usages)
         {
             if (usages.All(u => u.PreBuildMethod == null))
             {
@@ -225,7 +241,7 @@ namespace PS.Build.Tasks
                 try
                 {
                     var serviceProvider = new ServiceProvider();
-                    serviceProvider.AddService(typeof(CSharpCompilation), compilation);
+                    serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
@@ -243,10 +259,10 @@ namespace PS.Build.Tasks
         }
 
         private List<Artifact> ExecutePreBuildAdaptations(List<AdaptationUsage> usages,
-                                                          CSharpCompilation compilation,
                                                           ILogger logger)
         {
             var result = new List<Artifact>();
+
             if (usages.All(u => u.PreBuildMethod == null))
             {
                 logger.Info("There is no discovered adaptations with pre build instructions");
@@ -254,7 +270,6 @@ namespace PS.Build.Tasks
             }
 
             logger.Info("Executing discovered adaptations with pre build instructions");
-
             var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
 
             foreach (var usage in usages)
@@ -284,7 +299,7 @@ namespace PS.Build.Tasks
                     var artifactory = new Artifactory();
 
                     var serviceProvider = new ServiceProvider();
-                    serviceProvider.AddService(typeof(CSharpCompilation), compilation);
+                    serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
@@ -372,11 +387,6 @@ namespace PS.Build.Tasks
                                              .Where(t => typeof(Attribute).IsAssignableFrom(t))
                                              .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
                                              .Where(t => t.GetCustomAttribute<AttributeUsageAttribute>()?.Inherited == false);
-
-                    //var adaptMethod = GetPreBuildMethod(t);
-                    //var parameters = adaptMethod?.GetParameters();
-                    //if (parameters?.Length != 1) return false;
-                    //return parameters.First().ParameterType == typeof(IServiceProvider);
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }

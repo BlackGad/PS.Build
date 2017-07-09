@@ -6,8 +6,7 @@
 		<PSBuildTasksPath>$(PSBuildTasksDir)\$(PSBuildTasksFilename)</PSBuildTasksPath>
 		<AdaptationOptionDebug>false</AdaptationOptionDebug>
 	</PropertyGroup>
-
-	<UsingTask TaskName="PS.Build.Tasks.InitializeAdaptationBuildTask" AssemblyFile="$(PSBuildTasksPath)" />
+	
 	<UsingTask TaskName="PS.Build.Tasks.PreBuildAdaptationExecutionTask" AssemblyFile="$(PSBuildTasksPath)" />
 	<UsingTask TaskName="PS.Build.Tasks.PostBuildAdaptationExecutionTask" AssemblyFile="$(PSBuildTasksPath)" />
 
