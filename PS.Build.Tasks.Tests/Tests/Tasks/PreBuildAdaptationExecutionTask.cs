@@ -54,7 +54,7 @@ namespace PS.Build.Tasks.Tests.Tasks
                 builder.AppendLine($"Project {definitionProjectPath} compilation failed.");
                 foreach (var targetResult in result.ResultsByTarget)
                 {
-                    builder.AppendLine($"- Target({targetResult.Value.ResultCode}): {targetResult.Key}, {targetResult.Value.Exception}");
+                    builder.AppendLine($"- Target({targetResult.Value.ResultCode}): {targetResult.Key}, {targetResult.Value.Exception.Message}");
                 }
 
                 Assert.Fail(builder.ToString());
