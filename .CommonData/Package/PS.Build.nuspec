@@ -4,6 +4,9 @@
 		<id>PS.Build</id>
 		<version>$version$</version>
 		<authors>Shkolka Vladimir</authors>
+    <owners>Shkolka Vladimir</owners>
+    <projectUrl>https://github.com/BlackGad/PS.Build</projectUrl>
+    <licenseUrl>https://github.com/BlackGad/PS.Build/blob/master/LICENSE</licenseUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>API for PS.Build.Tasks</description>
 		<releaseNotes/>

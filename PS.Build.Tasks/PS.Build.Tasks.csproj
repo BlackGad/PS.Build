@@ -135,6 +135,7 @@
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Sandbox\AdaptationUsage.cs" />
     <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
+    <Compile Include="Sandbox\SandboxAssemblyResolver.cs" />
     <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
     <Compile Include="Services\ServiceProvider.cs" />
     <Compile Include="Services\Artifactory\ArtifactCache.cs" />
