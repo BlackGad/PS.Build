@@ -31,15 +31,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' AND Exists('..\..\..\..\bin\Debug\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\bin\Debug\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\bin\Debug\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\bin\Release\PS.Build.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' AND Exists('..\..\..\..\PS.Build.dll')">
+    <Reference Include="PS.Build">
+      <HintPath>..\..\..\..\PS.Build.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\PS.Build.dll')">
+    <Reference Include="PS.Build">
+      <HintPath>..\..\..\..\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
   

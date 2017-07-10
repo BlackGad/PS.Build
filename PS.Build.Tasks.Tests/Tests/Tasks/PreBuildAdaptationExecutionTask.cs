@@ -41,21 +41,26 @@ namespace PS.Build.Tasks.Tests.Tasks
             Assert.IsNotNull(outputPath, $"{nameof(outputPath)} was not found in {usageProjectPath} project file");
 
             var pc = new ProjectCollection();
-            pc.SetGlobalProperty("Configuration", configuration);
-            pc.SetGlobalProperty("Platform", platform);
+
+            var projectProperties = new Dictionary<string, string>
+            {
+                { "Configuration", configuration },
+                { "Platform", platform }
+            };
 
             var target = "Rebuild";
             var buildParameters = new BuildParameters(pc);
+
             var msBuildLogger = new MsBuildLogger
             {
-                Verbosity = LoggerVerbosity.Detailed
+                Verbosity = LoggerVerbosity.Normal
             };
             buildParameters.Loggers = new[] { msBuildLogger };
+            var projectInstance = new ProjectInstance(definitionProjectPath, projectProperties, "14.0");
             var result = BuildManager.DefaultBuildManager.Build(buildParameters,
-                                                                new BuildRequestData(new ProjectInstance(definitionProjectPath),
-                                                                                     new[] { target }));
+                                                                new BuildRequestData(projectInstance, new[] { target }));
             TargetResult buildResult;
-            if (!result.ResultsByTarget.TryGetValue(target, out buildResult))
+            if (!result.ResultsByTarget.TryGetValue(target, out buildResult) || buildResult.ResultCode != TargetResultCode.Success)
             {
                 var builder = new StringBuilder();
                 builder.AppendLine($"Project {definitionProjectPath} compilation failed.");
@@ -68,7 +73,6 @@ namespace PS.Build.Tasks.Tests.Tasks
                 Assert.Fail(builder.ToString());
             }
 
-            Assert.AreEqual(TargetResultCode.Success, buildResult.ResultCode);
             var taskObjectTable = new Dictionary<object, object>();
             var preBuildTask = BuildEngineRunner.Create<PreBuildAdaptationExecutionTask>(usageProjectPath,
                                                                                          taskObjectTable,
