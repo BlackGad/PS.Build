@@ -71,7 +71,7 @@ namespace PS.Build.Tasks
                 using (var stream = File.OpenWrite(cachePath))
                 {
                     var formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, _cacheTable.Values.ToArray());
+                    formatter.Serialize(stream, CacheTable.Values.ToArray());
                 }
             }
             catch (Exception)

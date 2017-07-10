@@ -52,30 +52,34 @@ namespace PS.Build.Tasks.Extensions
                 args = c.GetParameters()
             }).ToList();
 
-            for (var i = 0; i < data.AttributeConstructor.Parameters.Length; i++)
+            if (data.AttributeConstructor != null)
             {
-                var localIndex = i;
-                var constructorArgument = data.ConstructorArguments[i];
-                var argumentTypeName = constructorArgument.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(argumentTypeName))
-                    argumentTypeName = MapConcreteTypeToPredefinedTypeAlias[argumentTypeName];
-
-                var argumentType = Type.GetType(argumentTypeName);
-                var globalPrefix = "global::";
-                if (argumentType == null && argumentTypeName.StartsWith(globalPrefix))
+                for (var i = 0; i < data.AttributeConstructor.Parameters.Length; i++)
                 {
-                    argumentType = Type.GetType(argumentTypeName.Substring(globalPrefix.Length));
+                    var localIndex = i;
+                    var constructorArgument = data.ConstructorArguments[i];
+                    var argumentTypeName = constructorArgument.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(argumentTypeName))
+                        argumentTypeName = MapConcreteTypeToPredefinedTypeAlias[argumentTypeName];
+
+                    var argumentType = Type.GetType(argumentTypeName);
+                    var globalPrefix = "global::";
+                    if (argumentType == null && argumentTypeName.StartsWith(globalPrefix))
+                    {
+                        argumentType = Type.GetType(argumentTypeName.Substring(globalPrefix.Length));
+                    }
+
+                    valueSequence.Add(i < data.ConstructorArguments.Length
+                        ? constructorArgument.Value
+                        : null);
+
+                    var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
+                                                                 c.args[localIndex].ParameterType != argumentType)
+                                                     .ToList();
+                    invalidCtors.ForEach(c => availableCtors.Remove(c));
                 }
-
-                valueSequence.Add(i < data.ConstructorArguments.Length
-                    ? constructorArgument.Value
-                    : null);
-
-                var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
-                                                             c.args[localIndex].ParameterType != argumentType)
-                                                 .ToList();
-                invalidCtors.ForEach(c => availableCtors.Remove(c));
             }
+
             var ctor = availableCtors.FirstOrDefault();
             if (ctor == null)
             {

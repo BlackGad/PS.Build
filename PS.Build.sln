@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9058EC16
 		.CommonData\Package\Build\PS.Build.Tasks.targets = .CommonData\Package\Build\PS.Build.Tasks.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS.Build.Tasks.Tests", "PS.Build.Tasks.Tests\PS.Build.Tasks.Tests.csproj", "{848BBB62-64E0-4DAA-8766-07D62F75C1AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C7DA3BFC-5F78-4387-A6AC-F69490DC853C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7DA3BFC-5F78-4387-A6AC-F69490DC853C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7DA3BFC-5F78-4387-A6AC-F69490DC853C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,5 +54,6 @@ Global
 		{4503F7EF-6229-4345-9DD5-11BAD38464B1} = {17D847C1-6B21-4410-8BCD-1D85A7250747}
 		{C7DA3BFC-5F78-4387-A6AC-F69490DC853C} = {17D847C1-6B21-4410-8BCD-1D85A7250747}
 		{9058EC16-4579-4801-8A67-0E861A09A27D} = {FD4218ED-60F5-42CC-806E-3FD45E8B5EA0}
+		{848BBB62-64E0-4DAA-8766-07D62F75C1AA} = {16D7BEE4-581D-43A6-A45A-8CD3AF6E8FCF}
 	EndGlobalSection
 EndGlobal

@@ -24,31 +24,7 @@ namespace PS.Build.Tasks
         public SandboxClient(IExplorer explorer)
         {
             if (explorer == null) throw new ArgumentNullException(nameof(explorer));
-
             _explorer = explorer;
-
-            var assemblyReferences = _explorer.References.Select(i => i.FullPath).ToArray();
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-            {
-                var queryAssemblyName = args.Name.Split(',').FirstOrDefault();
-                var resolved = assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                                                    queryAssemblyName,
-                                                                                    StringComparison.InvariantCultureIgnoreCase));
-                var location = Assembly.GetExecutingAssembly().Location;
-                if (string.IsNullOrEmpty(resolved))
-                {
-                    if (string.IsNullOrEmpty(location)) return null;
-                    location = Path.GetDirectoryName(location);
-                    if (string.IsNullOrEmpty(location)) return null;
-                    resolved = Directory.GetFiles(location, "*.dll")
-                                        .FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                                           queryAssemblyName,
-                                                                           StringComparison.InvariantCultureIgnoreCase));
-                }
-                if (string.IsNullOrWhiteSpace(resolved)) return null;
-
-                return Assembly.LoadFile(resolved);
-            };
         }
 
         #endregion
@@ -59,20 +35,6 @@ namespace PS.Build.Tasks
         {
             ExecutePostBuildAdaptations(logger, _usages);
         }
-
-        //public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
-        //{
-        //    var artifacts = new List<Artifact>();
-        //    artifacts.AddRange(ExecutePreBuildAdaptations(_usages, logger));
-
-        //    using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
-        //    {
-        //        HandleArtifactsContent(artifacts, cacheManager, logger);
-        //        artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
-        //    }
-
-        //    return artifacts.Select(a => a.Serialize()).ToArray();
-        //}
 
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
         {
@@ -134,7 +96,8 @@ namespace PS.Build.Tasks
                 foreach (var pair in group)
                 {
                     var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
-                    var resolvedType = pair.Value.FirstOrDefault(t => attributeInfo.Symbol.IsEquivalent(t));
+                    var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
+                    var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
                     var attributeData = pair.Key.ResolveAttributeData(semanticModel);
 
                     if (resolvedType == null)
@@ -386,7 +349,14 @@ namespace PS.Build.Tasks
                     var foundTypes = assembly.GetTypes()
                                              .Where(t => typeof(Attribute).IsAssignableFrom(t))
                                              .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
-                                             .Where(t => t.GetCustomAttribute<AttributeUsageAttribute>()?.Inherited == false);
+                                             .Where(t =>
+                                             {
+                                                 var usageAttribute = t.GetCustomAttribute<AttributeUsageAttribute>() ??
+                                                                      new AttributeUsageAttribute(AttributeTargets.All);
+                                                 if (usageAttribute.ValidOn.HasFlag(AttributeTargets.Method) ||
+                                                     usageAttribute.ValidOn.HasFlag(AttributeTargets.Class)) return !usageAttribute.Inherited;
+                                                 return true;
+                                             });
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }

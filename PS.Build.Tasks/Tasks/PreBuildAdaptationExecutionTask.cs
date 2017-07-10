@@ -17,11 +17,10 @@ namespace PS.Build.Tasks
     {
         #region Constants
 
-        private static readonly Dictionary<BuildItem, PropertyInfo> ArtifactsProperties;
-
-        private static readonly Dictionary<BuildDirectory, PropertyInfo> DirectoryProperties;
-        private static readonly Dictionary<BuildItem, PropertyInfo> ItemsProperties;
-        private static readonly Dictionary<BuildProperty, PropertyInfo> PropertiesProperties;
+        public static readonly Dictionary<BuildItem, PropertyInfo> ArtifactsProperties;
+        public static readonly Dictionary<BuildDirectory, PropertyInfo> DirectoryProperties;
+        public static readonly Dictionary<BuildItem, PropertyInfo> ItemsProperties;
+        public static readonly Dictionary<BuildProperty, PropertyInfo> PropertiesProperties;
 
         #endregion
 
@@ -167,20 +166,19 @@ namespace PS.Build.Tasks
             var logger = new Logger(Log);
             try
             {
-                var items = ItemsProperties.ToDictionary(pair => pair.Key,
-                                                         pair =>
-                                                         {
-                                                             var taskItems = pair.Value?.GetValue(this) as IEnumerable<ITaskItem>;
-                                                             if (taskItems == null) return Enumerable.Empty<Item>();
-                                                             return taskItems.Select(c => new Item(c));
-                                                         });
+                var items = ItemsProperties.Enumerate().ToDictionary(pair => pair.Key,
+                                                                     pair =>
+                                                                     {
+                                                                         var taskItems = pair.Value?.GetValue(this) as IEnumerable<ITaskItem>;
+                                                                         if (taskItems == null) return Enumerable.Empty<Item>();
+                                                                         return taskItems.Select(c => new Item(c));
+                                                                     });
 
-                var references = References.Select(c => new Item(c));
-                var properties = PropertiesProperties.ToDictionary(pair => pair.Key, pair => pair.Value?.GetValue(this) as string);
-                var directories = DirectoryProperties.ToDictionary(pair => pair.Key, pair => pair.Value?.GetValue(this) as string);
+                var references = References.Enumerate().Select(c => new Item(c));
+                var properties = PropertiesProperties.Enumerate().ToDictionary(pair => pair.Key, pair => pair.Value?.GetValue(this) as string);
+                var directories = DirectoryProperties.Enumerate().ToDictionary(pair => pair.Key, pair => pair.Value?.GetValue(this) as string);
                 //Check solution folder property
-                if (string.IsNullOrWhiteSpace(directories[BuildDirectory.Solution]) ||
-                    directories[BuildDirectory.Solution] == "*Undefined*")
+                if (string.IsNullOrWhiteSpace(directories[BuildDirectory.Solution]) || directories[BuildDirectory.Solution] == "*Undefined*")
                 {
                     directories[BuildDirectory.Solution] = FindSolutionDirectory(properties[BuildProperty.ProjectFile],
                                                                                  directories[BuildDirectory.Project]);
@@ -190,6 +188,7 @@ namespace PS.Build.Tasks
                 foreach (var directory in directories.Keys.ToArray())
                 {
                     var sourceDirectory = directories[directory];
+                    if (sourceDirectory == null) continue;
                     if (!sourceDirectory.IsAbsolutePath()) sourceDirectory = Path.Combine(directories[BuildDirectory.Project], sourceDirectory);
                     directories[directory] = sourceDirectory.NormalizePath().TrimEnd('\\') + "\\";
                 }
