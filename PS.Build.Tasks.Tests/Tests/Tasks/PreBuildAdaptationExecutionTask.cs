@@ -42,7 +42,7 @@ namespace PS.Build.Tasks.Tests.Tasks
 
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", configuration);
-            pc.SetGlobalProperty("Platform", "Any CPU");
+            pc.SetGlobalProperty("Platform", platform);
 
             var target = "Rebuild";
             var buildParameters = new BuildParameters(pc);
