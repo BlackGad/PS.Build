@@ -25,19 +25,19 @@ namespace PS.Build.Tasks.Tests.Tasks
             var definitionProjectPath = Path.Combine(solutionDirectory, @"DefinitionLibrary\DefinitionLibrary.csproj");
             var usageProjectPath = Path.Combine(solutionDirectory, @"UsageLibrary\UsageLibrary.csproj");
             var usageProjectDirectory = Path.GetDirectoryName(usageProjectPath);
-            Assert.IsNotNull(usageProjectDirectory);
+            Assert.IsNotNull(usageProjectDirectory, $"{nameof(usageProjectDirectory)} is invalid");
 
             var configuration = "Release";
             var platform = "AnyCPU";
 
             var xProject = XDocument.Load(usageProjectPath);
-            Assert.IsNotNull(xProject);
+            Assert.IsNotNull(xProject, $"{nameof(xProject)} was not loaded from {usageProjectPath}");
 
             var msbuildNS = "http://schemas.microsoft.com/developer/msbuild/2003";
             var outputPath = xProject.Descendants(XName.Get("OutputPath", msbuildNS))
                                      .FirstOrDefault(e => e.Parent?.Attributes().Any(a => a.Value.Contains(configuration)) == true)?.Value;
 
-            Assert.IsNotNull(outputPath);
+            Assert.IsNotNull(outputPath, $"{nameof(outputPath)} was not found in {usageProjectPath} project file");
 
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", configuration);
@@ -47,7 +47,13 @@ namespace PS.Build.Tasks.Tests.Tasks
                                                                 new BuildRequestData(new ProjectInstance(definitionProjectPath),
                                                                                      new[] { target }));
             TargetResult buildResult;
-            Assert.IsTrue(result.ResultsByTarget.TryGetValue(target, out buildResult));
+            if (!result.ResultsByTarget.TryGetValue(target, out buildResult))
+            {
+                var message = $"Project {definitionProjectPath} compilation failed. Details: {result.Exception}";
+
+                Assert.Fail(message);
+            }
+
             Assert.AreEqual(TargetResultCode.Success, buildResult.ResultCode);
             var taskObjectTable = new Dictionary<object, object>();
             var preBuildTask = BuildEngineRunner.Create<PreBuildAdaptationExecutionTask>(usageProjectPath,
