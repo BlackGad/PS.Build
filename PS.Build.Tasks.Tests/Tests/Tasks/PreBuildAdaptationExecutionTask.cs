@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -49,9 +50,14 @@ namespace PS.Build.Tasks.Tests.Tasks
             TargetResult buildResult;
             if (!result.ResultsByTarget.TryGetValue(target, out buildResult))
             {
-                var message = $"Project {definitionProjectPath} compilation failed. Details: {result.Exception}";
+                var builder = new StringBuilder();
+                builder.AppendLine($"Project {definitionProjectPath} compilation failed.");
+                foreach (var targetResult in result.ResultsByTarget)
+                {
+                    builder.AppendLine($"- Target({targetResult.Value.ResultCode}): {targetResult.Key}, {targetResult.Value.Exception}");
+                }
 
-                Assert.Fail(message);
+                Assert.Fail(builder.ToString());
             }
 
             Assert.AreEqual(TargetResultCode.Success, buildResult.ResultCode);
