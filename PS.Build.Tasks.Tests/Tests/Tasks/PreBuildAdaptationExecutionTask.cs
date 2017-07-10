@@ -43,8 +43,15 @@ namespace PS.Build.Tasks.Tests.Tasks
             var pc = new ProjectCollection();
             pc.SetGlobalProperty("Configuration", configuration);
             pc.SetGlobalProperty("Platform", "Any CPU");
+
             var target = "Rebuild";
-            var result = BuildManager.DefaultBuildManager.Build(new BuildParameters(pc),
+            var buildParameters = new BuildParameters(pc);
+            var msBuildLogger = new MsBuildLogger
+            {
+                Verbosity = LoggerVerbosity.Detailed
+            };
+            buildParameters.Loggers = new[] { msBuildLogger };
+            var result = BuildManager.DefaultBuildManager.Build(buildParameters,
                                                                 new BuildRequestData(new ProjectInstance(definitionProjectPath),
                                                                                      new[] { target }));
             TargetResult buildResult;
@@ -54,7 +61,8 @@ namespace PS.Build.Tasks.Tests.Tasks
                 builder.AppendLine($"Project {definitionProjectPath} compilation failed.");
                 foreach (var targetResult in result.ResultsByTarget)
                 {
-                    builder.AppendLine($"- Target({targetResult.Value.ResultCode}): {targetResult.Key}, {targetResult.Value.Exception?.Message}");
+                    builder.AppendLine($"- Target: {targetResult.Key}, Code: ({targetResult.Value.ResultCode})");
+                    builder.AppendLine(msBuildLogger.GetLog());
                 }
 
                 Assert.Fail(builder.ToString());
