@@ -33,7 +33,7 @@ namespace PS.Build.Tasks
 
         public void ExecutePostBuildAdaptations(ILogger logger)
         {
-            ExecutePostBuildAdaptations(logger, _usages);
+            if(_usages != null) ExecutePostBuildAdaptations(logger, _usages);
         }
 
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)

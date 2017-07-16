@@ -5,14 +5,27 @@ using System.Reflection;
 
 namespace PS.Build.Tasks
 {
-    public class SandboxAssemblyResolver : MarshalByRefObject,
+    public class DomainAssemblyResolver : MarshalByRefObject,
                                            IDisposable
     {
+        #region Static members
+
+        private static string FindAtLocation(string queryAssemblyName, string location)
+        {
+            if (string.IsNullOrEmpty(location)) return null;
+            return Directory.GetFiles(location, "*.dll")
+                            .FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
+                                                               queryAssemblyName,
+                                                               StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        #endregion
+
         private readonly string[] _assemblyReferences;
 
         #region Constructors
 
-        public SandboxAssemblyResolver(string[] assemblyReferences)
+        public DomainAssemblyResolver(string[] assemblyReferences)
         {
             if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
             _assemblyReferences = assemblyReferences;
@@ -48,19 +61,6 @@ namespace PS.Build.Tasks
             return string.IsNullOrWhiteSpace(resolved)
                 ? null
                 : Assembly.LoadFile(resolved);
-        }
-
-        #endregion
-
-        #region Members
-
-        private string FindAtLocation(string queryAssemblyName, string location)
-        {
-            if (string.IsNullOrEmpty(location)) return null;
-            return Directory.GetFiles(location, "*.dll")
-                            .FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                               queryAssemblyName,
-                                                               StringComparison.InvariantCultureIgnoreCase));
         }
 
         #endregion
