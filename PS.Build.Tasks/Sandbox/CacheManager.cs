@@ -68,10 +68,12 @@ namespace PS.Build.Tasks
                 var cachePath = GetCachePath();
                 Path.GetDirectoryName(cachePath).EnsureDirectoryExist();
 
-                using (var stream = File.OpenWrite(cachePath))
+                using (var stream = new MemoryStream())
                 {
                     var formatter = new BinaryFormatter();
                     formatter.Serialize(stream, CacheTable.Values.ToArray());
+                    stream.Seek(0, SeekOrigin.Begin);
+                    File.WriteAllBytes(cachePath, stream.ToArray());
                 }
             }
             catch (Exception)
