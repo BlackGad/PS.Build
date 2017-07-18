@@ -30,32 +30,27 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' AND Exists('..\..\..\..\bin\Debug\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\bin\Debug\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\bin\Debug\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\bin\Release\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' AND Exists('..\..\..\..\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
-
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
-    <ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -66,12 +61,69 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Module\AllAttribute.cs" />
+    <Compile Include="Module\EmptyAttribute.cs" />
+    <Compile Include="Module\PostBuildAttribute.cs" />
+    <Compile Include="Module\PreBuildAttribute.cs" />
     <Compile Include="Assembly\AllAttribute.cs" />
     <Compile Include="Assembly\EmptyAttribute.cs" />
     <Compile Include="Assembly\PostBuildAttribute.cs" />
     <Compile Include="Assembly\PreBuildAttribute.cs" />
+    <Compile Include="Enum\AllAttribute.cs" />
+    <Compile Include="Enum\EmptyAttribute.cs" />
+    <Compile Include="Enum\PostBuildAttribute.cs" />
+    <Compile Include="Enum\PreBuildAttribute.cs" />
+    <Compile Include="Event\AllAttribute.cs" />
+    <Compile Include="Event\EmptyAttribute.cs" />
+    <Compile Include="Event\PostBuildAttribute.cs" />
+    <Compile Include="Event\PreBuildAttribute.cs" />
+    <Compile Include="Parameter\AllAttribute.cs" />
+    <Compile Include="Parameter\EmptyAttribute.cs" />
+    <Compile Include="Parameter\PostBuildAttribute.cs" />
+    <Compile Include="Parameter\PreBuildAttribute.cs" />
+    <Compile Include="Delegate\AllAttribute.cs" />
+    <Compile Include="Delegate\EmptyAttribute.cs" />
+    <Compile Include="Delegate\PostBuildAttribute.cs" />
+    <Compile Include="Delegate\PreBuildAttribute.cs" />
+    <Compile Include="ReturnValue\AllAttribute.cs" />
+    <Compile Include="ReturnValue\EmptyAttribute.cs" />
+    <Compile Include="ReturnValue\PostBuildAttribute.cs" />
+    <Compile Include="ReturnValue\PreBuildAttribute.cs" />
+    <Compile Include="Interface\AllAttribute.cs" />
+    <Compile Include="Interface\EmptyAttribute.cs" />
+    <Compile Include="Interface\PostBuildAttribute.cs" />
+    <Compile Include="Interface\PreBuildAttribute.cs" />
+    <Compile Include="Field\AllAttribute.cs" />
+    <Compile Include="Field\EmptyAttribute.cs" />
+    <Compile Include="Field\PostBuildAttribute.cs" />
+    <Compile Include="Field\PreBuildAttribute.cs" />
+    <Compile Include="Property\AllAttribute.cs" />
+    <Compile Include="Property\EmptyAttribute.cs" />
+    <Compile Include="Property\PostBuildAttribute.cs" />
+    <Compile Include="Property\PreBuildAttribute.cs" />
+    <Compile Include="GenericParameter\AllAttribute.cs" />
+    <Compile Include="GenericParameter\EmptyAttribute.cs" />
+    <Compile Include="GenericParameter\PostBuildAttribute.cs" />
+    <Compile Include="GenericParameter\PreBuildAttribute.cs" />
+    <Compile Include="Struct\AllAttribute.cs" />
+    <Compile Include="Struct\EmptyAttribute.cs" />
+    <Compile Include="Struct\PostBuildAttribute.cs" />
+    <Compile Include="Struct\PreBuildAttribute.cs" />
+    <Compile Include="Constructor\AllAttribute.cs" />
+    <Compile Include="Constructor\EmptyAttribute.cs" />
+    <Compile Include="Constructor\PostBuildAttribute.cs" />
+    <Compile Include="Constructor\PreBuildAttribute.cs" />
+    <Compile Include="Method\AllAttribute.cs" />
+    <Compile Include="Method\EmptyAttribute.cs" />
+    <Compile Include="Method\PostBuildAttribute.cs" />
+    <Compile Include="Method\PreBuildAttribute.cs" />
+    <Compile Include="Class\AllAttribute.cs" />
+    <Compile Include="Class\EmptyAttribute.cs" />
+    <Compile Include="Class\PostBuildAttribute.cs" />
+    <Compile Include="Class\PreBuildAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

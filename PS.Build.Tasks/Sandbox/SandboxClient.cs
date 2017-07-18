@@ -95,22 +95,26 @@ namespace PS.Build.Tasks
 
                 foreach (var pair in group)
                 {
-                    var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
-                    var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
-                    var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
-                    var attributeData = pair.Key.ResolveAttributeData(semanticModel);
-
-                    if (resolvedType == null)
+                    try
                     {
-                        logger.Warn($"Could not resolve '{pair.Key}' type");
-                        continue;
-                    }
+                        var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
+                        var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
+                        var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
+                        var attributeData = pair.Key.ResolveAttributeData(semanticModel);
 
-                    usages.Add(new AdaptationUsage(semanticModel,
-                                                   group.Key,
-                                                   pair.Key.Parent.Parent,
-                                                   attributeData,
-                                                   resolvedType));
+                        if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
+                        if (attributeData == null) throw new InvalidDataException($"Could not resolve attribute semantic");
+
+                        usages.Add(new AdaptationUsage(semanticModel,
+                                                       group.Key,
+                                                       pair.Key.Parent.Parent,
+                                                       attributeData,
+                                                       resolvedType));
+                    }
+                    catch (Exception e)
+                    {
+                        logger.Warn($"Unexpected internal error. Details: {e.GetBaseException().Message}");
+                    }
                 }
             }
             logger.Info($"Found {usages.Count} adaptation attribute usages");

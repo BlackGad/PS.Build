@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace PS.Build.Tasks.Extensions
@@ -109,35 +110,59 @@ namespace PS.Build.Tasks.Extensions
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-
+            AttributeData resolvedData;
             var attributeTarget = syntax.Parent.Parent;
             if (attributeTarget is CompilationUnitSyntax)
             {
-                return model.Compilation
-                            .Assembly
-                            .GetAttributes()
-                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                var defineOperator = syntax.Parent.ChildNodes().First() as AttributeTargetSpecifierSyntax;
+                if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in CompilationUnitSyntax");
+                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.AssemblyKeyword)
+                {
+                    return model.Compilation
+                                .Assembly
+                                .GetAttributes()
+                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                }
+                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ModuleKeyword)
+                {
+                    return model.Compilation
+                                .SourceModule
+                                .GetAttributes()
+                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                }
+                throw new InvalidOperationException("Unknown AttributeTargetSpecifierSyntax near attribute in CompilationUnitSyntax");
             }
 
-            var fieldDeclarationSyntax = attributeTarget as FieldDeclarationSyntax;
-            if (fieldDeclarationSyntax != null)
+            var baseFieldDeclarationSyntax = attributeTarget as BaseFieldDeclarationSyntax;
+            if (baseFieldDeclarationSyntax != null)
             {
-                foreach (var variable in fieldDeclarationSyntax.Declaration.Variables)
+                foreach (var variable in baseFieldDeclarationSyntax.Declaration.Variables)
                 {
-                    var resolvedData = model.GetDeclaredSymbol(variable)?
-                                            .GetAttributes()
-                                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    resolvedData = ModelExtensions.GetDeclaredSymbol(model, variable)?
+                                                  .GetAttributes()
+                                                  .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
                     if (resolvedData != null) return resolvedData;
                 }
-            }
-            else
-            {
-                return model.GetDeclaredSymbol(attributeTarget)?
-                            .GetAttributes()
-                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                throw new InvalidOperationException("Unexpected attribute declaration in FieldDeclarationSyntax");
             }
 
-            return null;
+            resolvedData = model.GetDeclaredSymbol(attributeTarget)?
+                                .GetAttributes()
+                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+            if (resolvedData != null) return resolvedData;
+
+            var methodDeclarationSyntax = attributeTarget as MethodDeclarationSyntax;
+            if (methodDeclarationSyntax != null)
+            {
+                var defineOperator = syntax.Parent.ChildNodes().First() as AttributeTargetSpecifierSyntax;
+                if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in MethodDeclarationSyntax");
+                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ReturnKeyword)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            throw new NotSupportedException($"Syntax: {attributeTarget.GetType().Name}");
         }
 
         #endregion

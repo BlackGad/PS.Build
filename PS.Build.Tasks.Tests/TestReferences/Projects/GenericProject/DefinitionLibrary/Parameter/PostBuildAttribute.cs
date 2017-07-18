@@ -3,9 +3,9 @@ using System.ComponentModel;
 using System.Reflection;
 using PS.Build.Services;
 
-namespace DefinitionLibrary.Assembly
+namespace DefinitionLibrary.Parameter
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
     public sealed class PostBuildAttribute : Attribute
     {

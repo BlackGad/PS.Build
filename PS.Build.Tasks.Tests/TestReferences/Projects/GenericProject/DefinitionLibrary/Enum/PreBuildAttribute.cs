@@ -3,20 +3,20 @@ using System.ComponentModel;
 using System.Reflection;
 using PS.Build.Services;
 
-namespace DefinitionLibrary.Assembly
+namespace DefinitionLibrary.Enum
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Enum, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public sealed class PostBuildAttribute : Attribute
+    public sealed class PreBuildAttribute : Attribute
     {
         #region Members
 
-        void PostBuild(IServiceProvider provider)
+        void PreBuild(IServiceProvider provider)
         {
             var logger = (ILogger)provider.GetService(typeof(ILogger));
             var type = GetType();
             var validOn = type.GetCustomAttribute<AttributeUsageAttribute>().ValidOn;
-            logger.Info(string.Join(",", "PostBuild", validOn, type.Name));
+            logger.Info(string.Join(",", "PreBuild", validOn, type.Name));
         }
 
         #endregion

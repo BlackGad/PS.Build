@@ -14,7 +14,13 @@ namespace PS.Build.Tasks
 
         public Sanbox(IExplorer explorer)
         {
-            TaskAssemblyResolver = new DomainAssemblyResolver(Enumerable.Empty<string>().ToArray());
+            var additionalReferenceDirectories = new[]
+            {
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories, Enumerable.Empty<string>().ToArray());
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(GetType().Assembly.Location),
@@ -24,7 +30,8 @@ namespace PS.Build.Tasks
             try
             {
                 _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
-                SandboxAssemblyResolver = Create<DomainAssemblyResolver>(new object[] { explorer.References.Select(r => r.FullPath).ToArray() });
+                SandboxAssemblyResolver = Create<DomainAssemblyResolver>(additionalReferenceDirectories,
+                                                                         explorer.References.Select(r => r.FullPath).ToArray());
                 Client = Create<SandboxClient>(explorer);
             }
             catch

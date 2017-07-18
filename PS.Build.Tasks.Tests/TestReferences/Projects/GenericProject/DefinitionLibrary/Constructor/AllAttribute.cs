@@ -3,11 +3,11 @@ using System.ComponentModel;
 using System.Reflection;
 using PS.Build.Services;
 
-namespace DefinitionLibrary.Assembly
+namespace DefinitionLibrary.Constructor
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public sealed class PostBuildAttribute : Attribute
+    public sealed class AllAttribute : Attribute
     {
         #region Members
 
@@ -17,6 +17,14 @@ namespace DefinitionLibrary.Assembly
             var type = GetType();
             var validOn = type.GetCustomAttribute<AttributeUsageAttribute>().ValidOn;
             logger.Info(string.Join(",", "PostBuild", validOn, type.Name));
+        }
+
+        void PreBuild(IServiceProvider provider)
+        {
+            var logger = (ILogger)provider.GetService(typeof(ILogger));
+            var type = GetType();
+            var validOn = type.GetCustomAttribute<AttributeUsageAttribute>().ValidOn;
+            logger.Info(string.Join(",", "PreBuild", validOn, type.Name));
         }
 
         #endregion

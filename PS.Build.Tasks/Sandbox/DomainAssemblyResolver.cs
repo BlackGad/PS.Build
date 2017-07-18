@@ -22,13 +22,16 @@ namespace PS.Build.Tasks
         #endregion
 
         private readonly string[] _assemblyReferences;
+        private readonly string[] _additionalDirectories;
 
         #region Constructors
 
-        public DomainAssemblyResolver(string[] assemblyReferences)
+        public DomainAssemblyResolver(string[] additionalDirectories, string[] assemblyReferences)
         {
+            if (additionalDirectories == null) throw new ArgumentNullException(nameof(additionalDirectories));
             if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
             _assemblyReferences = assemblyReferences;
+            _additionalDirectories = additionalDirectories;
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
@@ -51,12 +54,11 @@ namespace PS.Build.Tasks
             var resolved = _assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
                                                                                  queryAssemblyName,
                                                                                  StringComparison.InvariantCultureIgnoreCase));
-
-            var assemblyLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var domainBaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            resolved = resolved ??
-                       FindAtLocation(queryAssemblyName, assemblyLocation) ??
-                       FindAtLocation(queryAssemblyName, domainBaseDirectory);
+            foreach (var directory in _additionalDirectories)
+            {
+                if(resolved != null) break;
+                resolved = FindAtLocation(queryAssemblyName, directory);
+            }
 
             return string.IsNullOrWhiteSpace(resolved)
                 ? null
