@@ -16,5 +16,6 @@
 		<file src="Build\PS.Build.Tasks.targets" target="build" />
 		
 		<file src="..\..\PS.Build.Tasks\bin\Release\*.dll" target="tasks\MSBuild" />
+		<file src="..\..\PS.Build.Tasks\bin\Release\PS.Build.Tasks.dll.config" target="tasks\MSBuild" />
 	</files>
 </package>

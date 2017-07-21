@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace PS.Build.Tasks.Tests.Tasks
+namespace PS.Build.Tasks.Tests.Common
 {
     public class MsBuildLogger : Logger
     {

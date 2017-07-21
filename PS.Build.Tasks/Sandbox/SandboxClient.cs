@@ -33,7 +33,7 @@ namespace PS.Build.Tasks
 
         public void ExecutePostBuildAdaptations(ILogger logger)
         {
-            ExecutePostBuildAdaptations(logger, _usages);
+            if (_usages != null) ExecutePostBuildAdaptations(logger, _usages);
         }
 
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
@@ -95,22 +95,30 @@ namespace PS.Build.Tasks
 
                 foreach (var pair in group)
                 {
-                    var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
-                    var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
-                    var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
-                    var attributeData = pair.Key.ResolveAttributeData(semanticModel);
-
-                    if (resolvedType == null)
+                    try
                     {
-                        logger.Warn($"Could not resolve '{pair.Key}' type");
-                        continue;
-                    }
+                        var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
+                        var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
+                        var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
+                        var attributeData = pair.Key.ResolveAttributeData(semanticModel);
 
-                    usages.Add(new AdaptationUsage(semanticModel,
-                                                   group.Key,
-                                                   pair.Key.Parent.Parent,
-                                                   attributeData,
-                                                   resolvedType));
+                        if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
+                        if (attributeData == null) throw new InvalidDataException($"Could not resolve attribute semantic");
+
+                        usages.Add(new AdaptationUsage(semanticModel,
+                                                       group.Key,
+                                                       pair.Key.Parent.Parent,
+                                                       attributeData,
+                                                       resolvedType));
+                    }
+                    catch (NotSupportedException e)
+                    {
+                        logger.Debug($"Not supported feature. Details: {e.GetBaseException().Message}");
+                    }
+                    catch (Exception e)
+                    {
+                        logger.Warn($"Unexpected internal error. Details: {e.GetBaseException().Message}");
+                    }
                 }
             }
             logger.Info($"Found {usages.Count} adaptation attribute usages");
@@ -160,8 +168,11 @@ namespace PS.Build.Tasks
 
         private List<SyntaxTree> CreateSyntaxTrees()
         {
-            var compiles = _explorer.Items[BuildItem.Compile].Select(r => File.ReadAllText(r.FullPath)).ToArray();
-            var syntaxTrees = compiles.Select(c => CSharpSyntaxTree.ParseText(c)).ToList();
+            var syntaxTrees = _explorer.Items[BuildItem.Compile].Select(r =>
+            {
+                var text = File.ReadAllText(r.FullPath);
+                return CSharpSyntaxTree.ParseText(text, path: r.FullPath);
+            }).ToList();
             return syntaxTrees;
         }
 
@@ -349,14 +360,7 @@ namespace PS.Build.Tasks
                     var foundTypes = assembly.GetTypes()
                                              .Where(t => typeof(Attribute).IsAssignableFrom(t))
                                              .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
-                                             .Where(t =>
-                                             {
-                                                 var usageAttribute = t.GetCustomAttribute<AttributeUsageAttribute>() ??
-                                                                      new AttributeUsageAttribute(AttributeTargets.All);
-                                                 if (usageAttribute.ValidOn.HasFlag(AttributeTargets.Method) ||
-                                                     usageAttribute.ValidOn.HasFlag(AttributeTargets.Class)) return !usageAttribute.Inherited;
-                                                 return true;
-                                             });
+                                             .ToList();
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }
@@ -366,12 +370,32 @@ namespace PS.Build.Tasks
                 }
             }
 
+            //Recheck attributes for inheritance from adaptation types
             var adaptationTypes = AppDomain.CurrentDomain
                                            .GetAssemblies()
                                            .Where(a => pathBanns.Any(p => a.Location?.Contains(p) != true))
                                            .SelectMany(a => a.GetTypes().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
                                            .Where(t => !t.IsAbstract)
                                            .ToList();
+
+            //Check attribute usage inheritance option
+            var attributesWithWrongInheritance = adaptationTypes.Where(t =>
+            {
+                var usageAttribute = t.GetCustomAttribute<AttributeUsageAttribute>() ??
+                                     new AttributeUsageAttribute(AttributeTargets.All);
+                if (usageAttribute.ValidOn.HasFlag(AttributeTargets.Method) ||
+                    usageAttribute.ValidOn.HasFlag(AttributeTargets.Class)) return usageAttribute.Inherited;
+                return false;
+            }).ToList();
+            attributesWithWrongInheritance.ForEach(type => logger.Warn($"{type.FullName} has invalid inheritance attribute. Skipping..."));
+            adaptationTypes = adaptationTypes.Except(attributesWithWrongInheritance).ToList();
+
+            //Check attributes with out key methods
+            var emptyAttributes = adaptationTypes.Where(t => AdaptationUsage.GetPreBuildMethod(t) == null &&
+                                                             AdaptationUsage.GetPostBuildMethod(t) == null)
+                                                 .ToList();
+            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no PreBuid or PostBuild entries. Skipping..."));
+            adaptationTypes = adaptationTypes.Except(emptyAttributes).ToList();
 
             logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");
             foreach (var t in adaptationTypes)
