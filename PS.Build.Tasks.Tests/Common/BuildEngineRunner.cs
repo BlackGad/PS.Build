@@ -55,6 +55,7 @@ namespace PS.Build.Tasks.Tests.Common
                       .Callback<BuildMessageEventArgs>(ev =>
                       {
                           if (Debugger.IsAttached) Debug.WriteLine(ev.Message);
+                          Console.WriteLine(ev.Message);
                           lock (taskResult) taskResult.Messages.Add(ev);
                       });
 
@@ -62,6 +63,7 @@ namespace PS.Build.Tasks.Tests.Common
                       .Callback<BuildErrorEventArgs>(ev =>
                       {
                           if (Debugger.IsAttached) Debug.WriteLine("E: " + ev.Message);
+                          Console.WriteLine("E: " + ev.Message);
                           lock (taskResult) taskResult.Errors.Add(ev);
                       });
 
@@ -69,6 +71,7 @@ namespace PS.Build.Tasks.Tests.Common
                       .Callback<BuildWarningEventArgs>(ev =>
                       {
                           if (Debugger.IsAttached) Debug.WriteLine("W: " + ev.Message);
+                          Console.WriteLine("W: " + ev.Message);
                           lock (taskResult) taskResult.Warnings.Add(ev);
                       });
 
@@ -76,6 +79,7 @@ namespace PS.Build.Tasks.Tests.Common
                       .Callback<CustomBuildEventArgs>(ev =>
                       {
                           if (Debugger.IsAttached) Debug.WriteLine("C: " + ev.Message);
+                          Console.WriteLine("C: " + ev.Message);
                           lock (taskResult) taskResult.Custom.Add(ev);
                       });
 

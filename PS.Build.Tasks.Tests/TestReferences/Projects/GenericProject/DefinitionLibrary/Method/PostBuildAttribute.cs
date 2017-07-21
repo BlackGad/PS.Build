@@ -5,7 +5,7 @@ using PS.Build.Services;
 
 namespace DefinitionLibrary.Method
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     [Designer("PS.Build.Adaptation")]
     public sealed class PostBuildAttribute : Attribute
     {

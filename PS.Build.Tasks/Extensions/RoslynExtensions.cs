@@ -158,11 +158,11 @@ namespace PS.Build.Tasks.Extensions
                 if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in MethodDeclarationSyntax");
                 if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ReturnKeyword)
                 {
-                    throw new NotImplementedException();
+                    //throw new NotImplementedException();
                 }
             }
 
-            throw new NotSupportedException($"Syntax: {attributeTarget.GetType().Name}");
+            throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
         }
 
         #endregion
