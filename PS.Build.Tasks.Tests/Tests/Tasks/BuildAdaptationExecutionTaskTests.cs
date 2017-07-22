@@ -11,13 +11,6 @@ namespace PS.Build.Tasks.Tests.Tasks
     [TestFixture]
     class BuildAdaptationExecutionTaskTests
     {
-        //private static IEnumerable<string> CheckEntry(IEnumerable<string> availableMessages, string message)
-        //{
-        //    var count = availableMessages.Count(m => Equals(m, message));
-        //    if (count != 1) return new[] { $"Expected message '{message}' raised {count} times" };
-        //    return Enumerable.Empty<string>();
-        //}
-
         [Test]
         public void GenericAttributeUsageTest()
         {
@@ -62,7 +55,8 @@ namespace PS.Build.Tasks.Tests.Tasks
                 {
                     if (value == AttributeTargets.All) continue;
 
-                    errors.AddRange(preWarnings.AssertContains(1, $"DefinitionLibrary.{value}.EmptyAttribute has no PreBuid or PostBuild entries. Skipping..."));
+                    errors.AddRange(preWarnings.AssertContains(1,
+                                                               $"DefinitionLibrary.{value}.EmptyAttribute has no PreBuid or PostBuild entries. Skipping..."));
 
                     errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "PreBuildAttribute")));
                     errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "PostBuildAttribute")));
