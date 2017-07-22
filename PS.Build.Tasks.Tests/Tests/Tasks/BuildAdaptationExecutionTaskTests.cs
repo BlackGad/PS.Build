@@ -44,6 +44,7 @@ namespace PS.Build.Tasks.Tests.Tasks
                 var postMessages = runner.GetEvents(postBuildTask).Messages.Select(m => m.Message).ToList();
                 var preWarnings = runner.GetEvents(preBuildTask).Warnings.Select(m => m.Message).ToList();
                 var postWarnings = runner.GetEvents(postBuildTask).Warnings.Select(m => m.Message).ToList();
+                if (postWarnings.Any()) Assert.Fail(string.Join(Environment.NewLine, postWarnings));
 
                 var preErrors = runner.GetEvents(preBuildTask).Errors.Select(m => m.Message).ToList();
                 if (preErrors.Any()) Assert.Fail(string.Join(Environment.NewLine, preErrors));
@@ -63,20 +64,10 @@ namespace PS.Build.Tasks.Tests.Tasks
 
                     errors.AddRange(preWarnings.AssertContains(1, $"DefinitionLibrary.{value}.EmptyAttribute has no PreBuid or PostBuild entries. Skipping..."));
 
-                    //Skipping not supported attribute usage
-                    if (value != AttributeTargets.ReturnValue)
-                    {
-                        errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "PreBuildAttribute")));
-                        errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "PostBuildAttribute")));
-                        errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "AllAttribute")));
-                        errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "AllAttribute")));
-                    }
-                    else
-                    {
-                        errors.AddRange(preMessages.AssertContains(3,
-                                                                   "Not supported feature. Details: Cannot resolve attribute data",
-                                                                   "DefinitionLibrary.ReturnValue"));
-                    }
+                    errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "PreBuildAttribute")));
+                    errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "PostBuildAttribute")));
+                    errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "AllAttribute")));
+                    errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "AllAttribute")));
                 }
             }
             if (errors.Any()) Assert.Fail(string.Join(Environment.NewLine, errors));
