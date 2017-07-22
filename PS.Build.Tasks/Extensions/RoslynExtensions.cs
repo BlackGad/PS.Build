@@ -146,21 +146,16 @@ namespace PS.Build.Tasks.Extensions
                 throw new InvalidOperationException("Unexpected attribute declaration in FieldDeclarationSyntax");
             }
 
-            resolvedData = model.GetDeclaredSymbol(attributeTarget)?
-                                .GetAttributes()
-                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+            var declaredSymbol = model.GetDeclaredSymbol(attributeTarget);
+            resolvedData = declaredSymbol?.GetAttributes()
+                                          .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
             if (resolvedData != null) return resolvedData;
 
-            var methodDeclarationSyntax = attributeTarget as MethodDeclarationSyntax;
-            if (methodDeclarationSyntax != null)
-            {
-                var defineOperator = syntax.Parent.ChildNodes().First() as AttributeTargetSpecifierSyntax;
-                if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in MethodDeclarationSyntax");
-                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ReturnKeyword)
-                {
-                    //throw new NotImplementedException();
-                }
-            }
+            var methodSymbol = declaredSymbol as IMethodSymbol;
+            resolvedData = methodSymbol?.GetReturnTypeAttributes()
+                                        .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+
+            if (resolvedData != null) return resolvedData;
 
             throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
         }
