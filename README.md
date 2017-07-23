@@ -18,18 +18,7 @@ To execute defined earlier instructions you must add reference to PS.Build.Tasks
 
 ## How it works
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attribute usage prior to compilation.
-### Process flow
-1.	[PreBuildAdaptationExecutionTask](https://github.com/BlackGad/PS.Build/blob/master/PS.Build.Tasks/Tasks/PreBuildAdaptationExecutionTask.cs) depends from [ResolveReferences](https://stackoverflow.com/questions/29231077/what-exactly-does-the-target-resolvereferences-does-in-msbuild) target so has as input paths to all assembly references (compiled libraries)
-2.	References scan for adaptation attributes definitions
-3.	Assembly source code analysis for adaptation attributes usages (fast [syntax tree analysis](https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Syntax-Analysis))
-4.	If there is no suspicious attributes task break processing.
-5.	Otherwise suspicious attributes [semantic analysis](https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Semantic-Analysis).
-6.	Attributes instantiating
-7.	All **PreBuild** methods definition call.
-8.	Artifactory artifacts content generation analysis
-9.	Extend MSBuild with additional items
-10.	Code compilation
-11.	[PostBuildAdaptationExecutionTask](https://github.com/BlackGad/PS.Build/blob/master/PS.Build.Tasks/Tasks/PostBuildAdaptationExecutionTask.cs) execution after code compilation
-12.	All **PostBuild** methods definition call in attributes instances instantiated in 6 step
 
+## Documentation
+Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
 
