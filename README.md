@@ -19,6 +19,9 @@ To execute defined earlier instructions you must add reference to PS.Build.Tasks
 ## How it works
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attribute usage prior to compilation.
 
+## Lazy C#
+Adaptation syntax highly reuse lazy nature of C# language. All types that were used in instruction methods have no any relation to real application runtime. So you can easily ignore all adaptation related references in output folder.
+
 ## Documentation
 Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
 
