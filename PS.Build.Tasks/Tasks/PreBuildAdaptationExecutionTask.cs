@@ -11,6 +11,8 @@ using PS.Build.Tasks.Services;
 using PS.Build.Types;
 using Logger = PS.Build.Tasks.Services.Logger;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 namespace PS.Build.Tasks
 {
     public class PreBuildAdaptationExecutionTask : Task
