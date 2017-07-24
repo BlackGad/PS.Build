@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using PS.Build.Services;
 
@@ -13,6 +14,13 @@ namespace PS.Build.Tasks
 
         public Sanbox(IExplorer explorer)
         {
+            var additionalReferenceDirectories = new[]
+            {
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories, Enumerable.Empty<string>().ToArray());
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(GetType().Assembly.Location),
@@ -22,6 +30,8 @@ namespace PS.Build.Tasks
             try
             {
                 _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
+                SandboxAssemblyResolver = Create<DomainAssemblyResolver>(additionalReferenceDirectories,
+                                                                         explorer.References.Select(r => r.FullPath).ToArray());
                 Client = Create<SandboxClient>(explorer);
             }
             catch
@@ -37,12 +47,17 @@ namespace PS.Build.Tasks
 
         public SandboxClient Client { get; }
 
+        public DomainAssemblyResolver SandboxAssemblyResolver { get; }
+        public DomainAssemblyResolver TaskAssemblyResolver { get; }
+
         #endregion
 
         #region IDisposable Members
 
         public void Dispose()
         {
+            TaskAssemblyResolver.Dispose();
+            SandboxAssemblyResolver.Dispose();
             AppDomain.Unload(_appDomain);
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace PS.Build.Tasks.Extensions
@@ -52,30 +53,34 @@ namespace PS.Build.Tasks.Extensions
                 args = c.GetParameters()
             }).ToList();
 
-            for (var i = 0; i < data.AttributeConstructor.Parameters.Length; i++)
+            if (data.AttributeConstructor != null)
             {
-                var localIndex = i;
-                var constructorArgument = data.ConstructorArguments[i];
-                var argumentTypeName = constructorArgument.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(argumentTypeName))
-                    argumentTypeName = MapConcreteTypeToPredefinedTypeAlias[argumentTypeName];
-
-                var argumentType = Type.GetType(argumentTypeName);
-                var globalPrefix = "global::";
-                if (argumentType == null && argumentTypeName.StartsWith(globalPrefix))
+                for (var i = 0; i < data.AttributeConstructor.Parameters.Length; i++)
                 {
-                    argumentType = Type.GetType(argumentTypeName.Substring(globalPrefix.Length));
+                    var localIndex = i;
+                    var constructorArgument = data.ConstructorArguments[i];
+                    var argumentTypeName = constructorArgument.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(argumentTypeName))
+                        argumentTypeName = MapConcreteTypeToPredefinedTypeAlias[argumentTypeName];
+
+                    var argumentType = Type.GetType(argumentTypeName);
+                    var globalPrefix = "global::";
+                    if (argumentType == null && argumentTypeName.StartsWith(globalPrefix))
+                    {
+                        argumentType = Type.GetType(argumentTypeName.Substring(globalPrefix.Length));
+                    }
+
+                    valueSequence.Add(i < data.ConstructorArguments.Length
+                        ? constructorArgument.Value
+                        : null);
+
+                    var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
+                                                                 c.args[localIndex].ParameterType != argumentType)
+                                                     .ToList();
+                    invalidCtors.ForEach(c => availableCtors.Remove(c));
                 }
-
-                valueSequence.Add(i < data.ConstructorArguments.Length
-                    ? constructorArgument.Value
-                    : null);
-
-                var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
-                                                             c.args[localIndex].ParameterType != argumentType)
-                                                 .ToList();
-                invalidCtors.ForEach(c => availableCtors.Remove(c));
             }
+
             var ctor = availableCtors.FirstOrDefault();
             if (ctor == null)
             {
@@ -105,35 +110,54 @@ namespace PS.Build.Tasks.Extensions
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-
+            AttributeData resolvedData;
             var attributeTarget = syntax.Parent.Parent;
             if (attributeTarget is CompilationUnitSyntax)
             {
-                return model.Compilation
-                            .Assembly
-                            .GetAttributes()
-                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                var defineOperator = syntax.Parent.ChildNodes().First() as AttributeTargetSpecifierSyntax;
+                if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in CompilationUnitSyntax");
+                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.AssemblyKeyword)
+                {
+                    return model.Compilation
+                                .Assembly
+                                .GetAttributes()
+                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                }
+                if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ModuleKeyword)
+                {
+                    return model.Compilation
+                                .SourceModule
+                                .GetAttributes()
+                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                }
+                throw new InvalidOperationException("Unknown AttributeTargetSpecifierSyntax near attribute in CompilationUnitSyntax");
             }
 
-            var fieldDeclarationSyntax = attributeTarget as FieldDeclarationSyntax;
-            if (fieldDeclarationSyntax != null)
+            var baseFieldDeclarationSyntax = attributeTarget as BaseFieldDeclarationSyntax;
+            if (baseFieldDeclarationSyntax != null)
             {
-                foreach (var variable in fieldDeclarationSyntax.Declaration.Variables)
+                foreach (var variable in baseFieldDeclarationSyntax.Declaration.Variables)
                 {
-                    var resolvedData = model.GetDeclaredSymbol(variable)?
-                                            .GetAttributes()
-                                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    resolvedData = ModelExtensions.GetDeclaredSymbol(model, variable)?
+                                                  .GetAttributes()
+                                                  .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
                     if (resolvedData != null) return resolvedData;
                 }
-            }
-            else
-            {
-                return model.GetDeclaredSymbol(attributeTarget)?
-                            .GetAttributes()
-                            .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                throw new InvalidOperationException("Unexpected attribute declaration in FieldDeclarationSyntax");
             }
 
-            return null;
+            var declaredSymbol = model.GetDeclaredSymbol(attributeTarget);
+            resolvedData = declaredSymbol?.GetAttributes()
+                                          .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+            if (resolvedData != null) return resolvedData;
+
+            var methodSymbol = declaredSymbol as IMethodSymbol;
+            resolvedData = methodSymbol?.GetReturnTypeAttributes()
+                                        .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+
+            if (resolvedData != null) return resolvedData;
+
+            throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
         }
 
         #endregion

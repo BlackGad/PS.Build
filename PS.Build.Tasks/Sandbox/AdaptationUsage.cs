@@ -9,7 +9,7 @@ namespace PS.Build.Tasks
     {
         #region Static members
 
-        private static MethodInfo GetPostBuildMethod(Type t)
+        public static MethodInfo GetPostBuildMethod(Type t)
         {
             var method = t.GetMethod("PostBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var parameters = method?.GetParameters();
@@ -18,7 +18,7 @@ namespace PS.Build.Tasks
             return method;
         }
 
-        private static MethodInfo GetPreBuildMethod(Type t)
+        public static MethodInfo GetPreBuildMethod(Type t)
         {
             var method = t.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var parameters = method?.GetParameters();

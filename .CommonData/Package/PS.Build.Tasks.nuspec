@@ -4,7 +4,10 @@
 		<id>PS.Build.Tasks</id>
 		<version>$version$</version>
 		<authors>Shkolka Vladimir</authors>
-		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <owners>Shkolka Vladimir</owners>
+    <projectUrl>https://github.com/BlackGad/PS.Build</projectUrl>
+    <licenseUrl>https://github.com/BlackGad/PS.Build/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>MSBuild tasks for build adaptations</description>
 		<releaseNotes/>
 	</metadata>
@@ -13,5 +16,6 @@
 		<file src="Build\PS.Build.Tasks.targets" target="build" />
 		
 		<file src="..\..\PS.Build.Tasks\bin\Release\*.dll" target="tasks\MSBuild" />
+		<file src="..\..\PS.Build.Tasks\bin\Release\PS.Build.Tasks.dll.config" target="tasks\MSBuild" />
 	</files>
 </package>
