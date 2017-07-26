@@ -26,6 +26,11 @@ Adaptation attributes do not require any additional types to be defined to. [Des
 #### Preprocessor directives isolation
 Main adaptation attributes mission - allow you to modify build process. So their existence in source code make sense only till compile finished. There is no reasons to stay in runtime code after build process. That's why syntax trees analyzed with **DEBUG** preprocessor directive. Escape all your attributes with this directive. It is comfortable way to apply them in debug mode with intellisense and to drop them in release build from source code at all. NOTE: in release build they still will be processed with adaptation task.
 
+## Intellisense issues
+When you add additional **COMPILE** items on [PreBuild](https://github.com/BlackGad/PS.Build/wiki/PreBuild-method) instruction with [artifactory service](https://github.com/BlackGad/PS.Build/wiki/Artifactory-service) your intellisense will not resolve them automatically. It happens because intelisense engine parses your compile items independenly from MSBuild. To solve this you have two major options:
+* Compile project and reload it with out cleaning. Intellisense updates on project load so it will discover new items and parse them.
+* Add to **COMPILE** item where you applying attribute (and all dependant items) metadata `<Generator>MSBuild:Compile</Generator>` it forces intellisense to update on every file change.
+
 ## Documentation
 Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
 
