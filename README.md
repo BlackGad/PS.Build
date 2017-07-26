@@ -20,7 +20,7 @@ To execute defined earlier instructions you must add reference to PS.Build.Tasks
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attributes usage prior to compilation and execute their methods with specific signature.
 
 ## Attributes isolation
-It is crucial to keep compiled output in clean state with minimum amount of dependencies. Thats why attributes uses 2 level of isolation.
+It is crucial to keep compiled output in clean state with minimum amount of dependencies. That's why attributes can be isolated in several ways.
 #### Lazy C# isolation
 Adaptation attributes do not require any additional types to be defined to. [DesignerAttribute](https://msdn.microsoft.com/en-us/library/system.componentmodel.designerattribute(v=vs.110).aspx) attribute and [IServiceProvider](https://msdn.microsoft.com/en-us/library/system.iserviceprovider(v=vs.110).aspx) interface are public .NET Framework types. So any internal methods content does not require to load additional types which used in adaptation process. Simple attributes scan will not try to resolve this types unless you define them as public contructor parameters or public properties. Also with [GetCustomAttributes](https://msdn.microsoft.com/en-us/library/system.type.getcustomattributes(v=vs.110).aspx) constructor will be called. Thats why try to not use additional types for adaptation in it. And because previous advice makes the use of attributes uncomfortable second isolation level exist.
 #### Preprocessor directives isolation
