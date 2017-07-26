@@ -17,10 +17,14 @@ Build process extending have 2 logical parts
 To execute defined earlier instructions you must add reference to PS.Build.Tasks nuget package and apply attributes to relevant elements. NOTE: attribute definition must be in separate assembly. Same assembly attribute definition not implemented yet (Technically it is possible but whole build process time will be dramatically increased). 
 
 ## How it works
-[PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attribute usage prior to compilation.
+[PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attributes usage prior to compilation and execute their methods with specific signature.
 
-## Lazy C#
-Adaptation syntax highly reuse lazy nature of C# language. All types that were used in instruction methods have no any relation to real application runtime. So you can easily ignore all adaptation related references in output folder.
+## Attributes isolation
+It is crucial to keep compiled output in clean state with minimum amount of dependencies. Thats why attributes uses 2 level of isolation.
+#### Lazy C# isolation
+Adaptation attributes do not require any additional types to be defined to. [DesignerAttribute](https://msdn.microsoft.com/en-us/library/system.componentmodel.designerattribute(v=vs.110).aspx) attribute and [IServiceProvider](https://msdn.microsoft.com/en-us/library/system.iserviceprovider(v=vs.110).aspx) interface are public .NET Framework types. So any internal methods content does not require to load additional types which used in adaptation process. Simple attributes scan will not try to resolve this types unless you define them as public contructor parameters or public properties. Also with [GetCustomAttributes](https://msdn.microsoft.com/en-us/library/system.type.getcustomattributes(v=vs.110).aspx) constructor will be called. Thats why try to not use additional types for adaptation in it. And because previous advice makes the use of attributes uncomfortable second isolation level exist.
+#### Preprocessor directives isolation
+Main adaptation attributes mission - allow you to modify build process. So their existence in source code make sense only till compile finished. There is no reasons to stay in runtime code after build process. That's why syntax trees analyzed with **DEBUG** preprocessor directive. Escape all your attributes with this directive. It is comfortable way to apply them in debug mode with intellisense and to drop them in release build from source code at all.
 
 ## Documentation
 Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
