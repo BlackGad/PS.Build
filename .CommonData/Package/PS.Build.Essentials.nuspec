@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+	<metadata>
+		<id>PS.Build.Essentials</id>
+		<version>$version$</version>
+		<authors>Shkolka Vladimir</authors>
+    <owners>Shkolka Vladimir</owners>
+    <projectUrl>https://github.com/BlackGad/PS.Build</projectUrl>
+    <licenseUrl>https://github.com/BlackGad/PS.Build/blob/master/LICENSE</licenseUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>Package contains essentials attributes for PS.Build</description>
+		<releaseNotes/>
+		<references>
+			<reference file="PS.Build.Essentials.dll"/>
+		</references>
+	</metadata>
+	<files>
+		<file src="..\..\PS.Build.Essentials\bin\Release\PS.Build.Essentials.dll" target="lib\net45" />
+	</files>
+</package>

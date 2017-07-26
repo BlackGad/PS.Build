@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{16D7BEE4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Package", "Package", "{FD4218ED-60F5-42CC-806E-3FD45E8B5EA0}"
 	ProjectSection(SolutionItems) = preProject
+		.CommonData\Package\PS.Build.Essentials.nuspec = .CommonData\Package\PS.Build.Essentials.nuspec
 		.CommonData\Package\PS.Build.nuspec = .CommonData\Package\PS.Build.nuspec
 		.CommonData\Package\PS.Build.Tasks.nuspec = .CommonData\Package\PS.Build.Tasks.nuspec
 	EndProjectSection
@@ -26,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{9058EC16
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS.Build.Tasks.Tests", "PS.Build.Tasks.Tests\PS.Build.Tasks.Tests.csproj", "{848BBB62-64E0-4DAA-8766-07D62F75C1AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS.Build.Essentials", "PS.Build.Essentials\PS.Build.Essentials.csproj", "{615DD8B1-0109-4418-944B-929134EE7967}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +48,10 @@ Global
 		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{848BBB62-64E0-4DAA-8766-07D62F75C1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{615DD8B1-0109-4418-944B-929134EE7967}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{615DD8B1-0109-4418-944B-929134EE7967}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{615DD8B1-0109-4418-944B-929134EE7967}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{615DD8B1-0109-4418-944B-929134EE7967}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,5 +62,6 @@ Global
 		{C7DA3BFC-5F78-4387-A6AC-F69490DC853C} = {17D847C1-6B21-4410-8BCD-1D85A7250747}
 		{9058EC16-4579-4801-8A67-0E861A09A27D} = {FD4218ED-60F5-42CC-806E-3FD45E8B5EA0}
 		{848BBB62-64E0-4DAA-8766-07D62F75C1AA} = {16D7BEE4-581D-43A6-A45A-8CD3AF6E8FCF}
+		{615DD8B1-0109-4418-944B-929134EE7967} = {17D847C1-6B21-4410-8BCD-1D85A7250747}
 	EndGlobalSection
 EndGlobal

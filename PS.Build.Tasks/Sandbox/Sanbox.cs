@@ -14,17 +14,24 @@ namespace PS.Build.Tasks
 
         public Sanbox(IExplorer explorer)
         {
+            var executingAssembly = Assembly.GetExecutingAssembly();
             var additionalReferenceDirectories = new[]
             {
-                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                Path.GetDirectoryName(executingAssembly.Location),
                 AppDomain.CurrentDomain.BaseDirectory
             };
 
+            var configurationFile = executingAssembly.Location + ".config";
+            if (!File.Exists(configurationFile))
+            {
+                //Unit tests
+                configurationFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.config");
+            }
             TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories, Enumerable.Empty<string>().ToArray());
             var domainSetup = new AppDomainSetup
             {
-                ApplicationBase = Path.GetDirectoryName(GetType().Assembly.Location),
-                ConfigurationFile = Assembly.GetExecutingAssembly().Location + ".config"
+                ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
+                ConfigurationFile = configurationFile
             };
 
             try

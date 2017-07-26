@@ -19,7 +19,7 @@ namespace PS.Build.Tasks.Tests.Tasks
 
             var solution = new TestSolution(solutionDirectory);
 
-            var references = solution.Project("DefinitionLibrary").Compile();
+            var references = solution.Project("UsageLibrary").GetReferences();
             var usageLibrary = solution.Project("UsageLibrary");
             var errors = new List<string>();
             using (var runner = new BuildEngineRunner(usageLibrary.Path))
