@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace PS.Build.Types
 {
+    /// <summary>
+    ///     Wrapped MSBuild item.
+    /// </summary>
     public interface IItem
     {
         #region Properties

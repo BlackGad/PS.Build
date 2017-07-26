@@ -171,7 +171,7 @@ namespace PS.Build.Tasks
             var syntaxTrees = _explorer.Items[BuildItem.Compile].Select(r =>
             {
                 var text = File.ReadAllText(r.FullPath);
-                return CSharpSyntaxTree.ParseText(text, path: r.FullPath);
+                return CSharpSyntaxTree.ParseText(text, path: r.FullPath, options: new CSharpParseOptions(preprocessorSymbols: new[] { "DEBUG" }));
             }).ToList();
             return syntaxTrees;
         }

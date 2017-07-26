@@ -23,27 +23,27 @@ namespace PS.Build.Tasks.Services
 
         public void Critical(string message)
         {
-            _log.LogCriticalMessage(null, null, null, null, 0, 0, 0, 0, message);
+            _log.LogCriticalMessage(null, null, null, null, 0, 0, 0, 0, message ?? string.Empty);
         }
 
         public void Debug(string message)
         {
-            _log.LogMessage(MessageImportance.Low, message);
+            _log.LogMessage(MessageImportance.Low, message ?? string.Empty);
         }
 
         public void Error(string message)
         {
-            _log.LogError(message);
+            _log.LogError(message ?? string.Empty);
         }
 
         public void Info(string message)
         {
-            _log.LogMessage(MessageImportance.Normal, message);
+            _log.LogMessage(MessageImportance.Normal, message ?? string.Empty);
         }
 
         public void Warn(string message)
         {
-            _log.LogWarning(message);
+            _log.LogWarning(message ?? string.Empty);
         }
 
         #endregion

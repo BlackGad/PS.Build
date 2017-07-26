@@ -6,7 +6,7 @@ using System.Reflection;
 namespace PS.Build.Tasks
 {
     public class DomainAssemblyResolver : MarshalByRefObject,
-                                           IDisposable
+                                          IDisposable
     {
         #region Static members
 
@@ -21,8 +21,10 @@ namespace PS.Build.Tasks
 
         #endregion
 
-        private readonly string[] _assemblyReferences;
         private readonly string[] _additionalDirectories;
+
+        private readonly string[] _assemblyReferences;
+        private readonly string[] _bannedDirectories;
 
         #region Constructors
 
@@ -32,6 +34,11 @@ namespace PS.Build.Tasks
             if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
             _assemblyReferences = assemblyReferences;
             _additionalDirectories = additionalDirectories;
+            _bannedDirectories = new[]
+            {
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)}\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework",
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)}\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework"
+            };
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
@@ -56,7 +63,15 @@ namespace PS.Build.Tasks
                                                                                  StringComparison.InvariantCultureIgnoreCase));
             foreach (var directory in _additionalDirectories)
             {
-                if(resolved != null) break;
+                if (resolved != null) break;
+                resolved = FindAtLocation(queryAssemblyName, directory);
+            }
+
+            foreach (var reference in _assemblyReferences)
+            {
+                if (resolved != null) break;
+                if (_bannedDirectories.Any(b => reference.StartsWith(b, StringComparison.InvariantCultureIgnoreCase))) continue;
+                var directory = Path.GetDirectoryName(reference);
                 resolved = FindAtLocation(queryAssemblyName, directory);
             }
 
