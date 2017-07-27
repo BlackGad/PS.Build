@@ -15,6 +15,7 @@ namespace PS.Build.Tasks
 {
     public class SandboxClient : MarshalByRefObject
     {
+        private readonly IDynamicVault _dynamicVault;
         private readonly IExplorer _explorer;
         private CSharpCompilation _compilation;
         private List<AdaptationUsage> _usages;
@@ -25,6 +26,7 @@ namespace PS.Build.Tasks
         {
             if (explorer == null) throw new ArgumentNullException(nameof(explorer));
             _explorer = explorer;
+            _dynamicVault = new DynamicVault();
         }
 
         #endregion
@@ -222,6 +224,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(ILogger), logger);
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
+                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
 
                     method.Invoke(attribute, new object[] { serviceProvider });
                 }
@@ -281,6 +284,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(IArtifactory), artifactory);
                     serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
+                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
 
                     method.Invoke(attribute, new object[] { serviceProvider });
 

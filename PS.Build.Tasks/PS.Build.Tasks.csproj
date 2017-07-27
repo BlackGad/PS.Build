@@ -136,6 +136,7 @@
     <Compile Include="Sandbox\AdaptationUsage.cs" />
     <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
     <Compile Include="Sandbox\DomainAssemblyResolver.cs" />
+    <Compile Include="Services\DynamicVault.cs" />
     <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
     <Compile Include="Services\ServiceProvider.cs" />
     <Compile Include="Services\Artifactory\ArtifactCache.cs" />

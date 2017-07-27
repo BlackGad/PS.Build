@@ -18,38 +18,29 @@ namespace PS.Build.Tasks.Tests.Tasks
             var solutionDirectory = Path.Combine(targetDirectory, @"TestReferences\Projects\GenericProject\");
 
             var solution = new TestSolution(solutionDirectory);
-
-            var references = solution.Project("UsageLibrary").GetReferences();
             var usageLibrary = solution.Project("UsageLibrary");
+
             var errors = new List<string>();
             using (var runner = new BuildEngineRunner(usageLibrary.Path))
             {
                 var preBuildTask = runner.Create<PreBuildAdaptationExecutionTask>();
                 preBuildTask.Setup(usageLibrary);
 
-                preBuildTask.References = references.ToArray();
+                preBuildTask.References = usageLibrary.GetReferences().ToArray();
                 preBuildTask.Execute();
 
                 var postBuildTask = runner.Create<PostBuildAdaptationExecutionTask>();
                 postBuildTask.Execute();
 
-                var preMessages = runner.GetEvents(preBuildTask).Messages.Select(m => m.Message).ToList();
-                var postMessages = runner.GetEvents(postBuildTask).Messages.Select(m => m.Message).ToList();
-                var preWarnings = runner.GetEvents(preBuildTask).Warnings.Select(m => m.Message).ToList();
-                var postWarnings = runner.GetEvents(postBuildTask).Warnings.Select(m => m.Message).ToList();
-                if (postWarnings.Any()) Assert.Fail(string.Join(Environment.NewLine, postWarnings));
+                var preMessages = runner.GetEvents(preBuildTask).Messages;
+                var postMessages = runner.GetEvents(postBuildTask).Messages;
+                var preWarnings = runner.GetEvents(preBuildTask).Warnings;
 
-                var preErrors = runner.GetEvents(preBuildTask).Errors.Select(m => m.Message).ToList();
-                if (preErrors.Any()) Assert.Fail(string.Join(Environment.NewLine, preErrors));
-
-                var postErrors = runner.GetEvents(postBuildTask).Errors.Select(m => m.Message).ToList();
-                if (postErrors.Any()) Assert.Fail(string.Join(Environment.NewLine, postErrors));
-
-                var preCustom = runner.GetEvents(preBuildTask).Custom.Select(m => m.Message).ToList();
-                if (preCustom.Any()) Assert.Fail(string.Join(Environment.NewLine, preCustom));
-
-                var postCustom = runner.GetEvents(postBuildTask).Custom.Select(m => m.Message).ToList();
-                if (postCustom.Any()) Assert.Fail(string.Join(Environment.NewLine, postCustom));
+                errors.AddRange(runner.GetEvents(postBuildTask).Warnings.AssertEmpty());
+                errors.AddRange(runner.GetEvents(preBuildTask).Errors.AssertEmpty());
+                errors.AddRange(runner.GetEvents(postBuildTask).Errors.AssertEmpty());
+                errors.AddRange(runner.GetEvents(preBuildTask).Custom.AssertEmpty());
+                errors.AddRange(runner.GetEvents(postBuildTask).Custom.AssertEmpty());
 
                 foreach (AttributeTargets value in Enum.GetValues(typeof(AttributeTargets)))
                 {
@@ -75,7 +66,6 @@ namespace PS.Build.Tasks.Tests.Tasks
 
             var solution = new TestSolution(solutionDirectory);
 
-            var references = solution.Project("DefinitionLibrary").Compile();
             var usageLibrary = solution.Project("UsageWithDirectivesLibrary");
             var errors = new List<string>();
             using (var runner = new BuildEngineRunner(usageLibrary.Path))
@@ -83,29 +73,21 @@ namespace PS.Build.Tasks.Tests.Tasks
                 var preBuildTask = runner.Create<PreBuildAdaptationExecutionTask>();
                 preBuildTask.Setup(usageLibrary);
 
-                preBuildTask.References = references.ToArray();
+                preBuildTask.References = usageLibrary.GetReferences().ToArray();
                 preBuildTask.Execute();
 
                 var postBuildTask = runner.Create<PostBuildAdaptationExecutionTask>();
                 postBuildTask.Execute();
 
-                var preMessages = runner.GetEvents(preBuildTask).Messages.Select(m => m.Message).ToList();
-                var postMessages = runner.GetEvents(postBuildTask).Messages.Select(m => m.Message).ToList();
-                var preWarnings = runner.GetEvents(preBuildTask).Warnings.Select(m => m.Message).ToList();
-                var postWarnings = runner.GetEvents(postBuildTask).Warnings.Select(m => m.Message).ToList();
-                if (postWarnings.Any()) Assert.Fail(string.Join(Environment.NewLine, postWarnings));
+                var preMessages = runner.GetEvents(preBuildTask).Messages;
+                var postMessages = runner.GetEvents(postBuildTask).Messages;
+                var preWarnings = runner.GetEvents(preBuildTask).Warnings;
 
-                var preErrors = runner.GetEvents(preBuildTask).Errors.Select(m => m.Message).ToList();
-                if (preErrors.Any()) Assert.Fail(string.Join(Environment.NewLine, preErrors));
-
-                var postErrors = runner.GetEvents(postBuildTask).Errors.Select(m => m.Message).ToList();
-                if (postErrors.Any()) Assert.Fail(string.Join(Environment.NewLine, postErrors));
-
-                var preCustom = runner.GetEvents(preBuildTask).Custom.Select(m => m.Message).ToList();
-                if (preCustom.Any()) Assert.Fail(string.Join(Environment.NewLine, preCustom));
-
-                var postCustom = runner.GetEvents(postBuildTask).Custom.Select(m => m.Message).ToList();
-                if (postCustom.Any()) Assert.Fail(string.Join(Environment.NewLine, postCustom));
+                errors.AddRange(runner.GetEvents(postBuildTask).Warnings.AssertEmpty());
+                errors.AddRange(runner.GetEvents(preBuildTask).Errors.AssertEmpty());
+                errors.AddRange(runner.GetEvents(postBuildTask).Errors.AssertEmpty());
+                errors.AddRange(runner.GetEvents(preBuildTask).Custom.AssertEmpty());
+                errors.AddRange(runner.GetEvents(postBuildTask).Custom.AssertEmpty());
 
                 foreach (AttributeTargets value in Enum.GetValues(typeof(AttributeTargets)))
                 {
