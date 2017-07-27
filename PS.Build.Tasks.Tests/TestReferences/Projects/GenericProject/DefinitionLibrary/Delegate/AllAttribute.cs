@@ -12,7 +12,7 @@ namespace DefinitionLibrary.Delegate
     {
         #region Constructors
 
-        public AllAttribute([CallerFilePath] string file = null) : base(file)
+        public AllAttribute([CallerLineNumber] int position = default(int), [CallerFilePath] string file = null) : base(position, file)
         {
         }
 

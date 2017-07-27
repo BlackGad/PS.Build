@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using PS.Build.Tasks.Tests.Common;
 using PS.Build.Tasks.Tests.Common.Extensions;
@@ -238,13 +239,43 @@ namespace PS.Build.Tasks.Tests.Tasks
                 errors.AddRange(runner.GetEvents(preBuildTask).Custom.AssertEmpty());
                 errors.AddRange(runner.GetEvents(postBuildTask).Custom.AssertEmpty());
 
-                var sequence = new List<object>();
+                var regex = new Regex("^[^,]+,[^,]+,[^,]+,[^,]+,[^,]+$");
 
-                //Assembly attributes first
-                sequence.AddRange(GetSequenceMessages(AttributeTargets.Assembly, ExpectedOrderedMap[AttributeTargets.Assembly]));
+                var sequence = new List<AttributeTargets>
+                {
+                    AttributeTargets.Assembly,
+                    AttributeTargets.Field | AttributeTargets.Event, //event as field
+                    AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.GenericParameter, //param of method
+                    AttributeTargets.Constructor | AttributeTargets.Method,
+                    AttributeTargets.Property | AttributeTargets.Event, //event as property
+                    AttributeTargets.GenericParameter, //param of type definition
+                    AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Delegate,
+                    AttributeTargets.Module
+                };
 
-                //Module attributes last
-                sequence.AddRange(GetSequenceMessages(AttributeTargets.Module, ExpectedOrderedMap[AttributeTargets.Module]));
+                var filteredMessages = preMessages.Select(m => m.Message).Where(m => regex.IsMatch(m)).ToList();
+                var minIndex = 0;
+                for (int i = 0; i < filteredMessages.Count; i++)
+                {
+                    var message = filteredMessages[i];
+                    var index = sequence.Skip(minIndex)
+                                        .ToList()
+                                        .FindIndex(p => p.HasFlag((AttributeTargets)Enum.Parse(typeof(AttributeTargets), message.Split(',')[1])));
+                    if (index == -1) Assert.Fail($"Unexpected message {i}: {message} min({minIndex}:{sequence[minIndex]}) position");
+                    minIndex += index;
+                }
+
+                filteredMessages = postMessages.Select(m => m.Message).Where(m => regex.IsMatch(m)).ToList();
+                minIndex = 0;
+                for (int i = 0; i < filteredMessages.Count; i++)
+                {
+                    var message = filteredMessages[i];
+                    var index = sequence.Skip(minIndex)
+                                        .ToList()
+                                        .FindIndex(p => p.HasFlag((AttributeTargets)Enum.Parse(typeof(AttributeTargets), message.Split(',')[1])));
+                    if (index == -1) Assert.Fail($"Unexpected message {i}: {message} min({minIndex}:{sequence[minIndex]}) position");
+                    minIndex += index;
+                }
             }
             if (errors.Any()) Assert.Fail(string.Join(Environment.NewLine, errors));
         }

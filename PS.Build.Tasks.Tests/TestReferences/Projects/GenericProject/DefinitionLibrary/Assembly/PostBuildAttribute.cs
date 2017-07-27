@@ -12,7 +12,7 @@ namespace DefinitionLibrary.Assembly
     {
         #region Constructors
 
-        public PostBuildAttribute([CallerFilePath] string file = null) : base(file)
+        public PostBuildAttribute([CallerLineNumber] int position = default(int), [CallerFilePath] string file = null) : base(position, file)
         {
         }
 

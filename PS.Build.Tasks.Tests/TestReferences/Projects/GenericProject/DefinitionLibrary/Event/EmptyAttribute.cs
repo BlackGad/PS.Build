@@ -10,7 +10,7 @@ namespace DefinitionLibrary.Event
     {
         #region Constructors
 
-        public EmptyAttribute([CallerFilePath] string file = null) : base(file)
+        public EmptyAttribute([CallerLineNumber] int position = default(int), [CallerFilePath] string file = null) : base(position, file)
         {
         }
 

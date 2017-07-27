@@ -10,7 +10,7 @@ namespace DefinitionLibrary.Constructor
     {
         #region Constructors
 
-        public PreBuildAttribute([CallerFilePath] string file = null) : base(file)
+        public PreBuildAttribute([CallerLineNumber] int position = default(int), [CallerFilePath] string file = null) : base(position, file)
         {
         }
 
