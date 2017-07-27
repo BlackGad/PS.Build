@@ -1,30 +1,31 @@
 using System;
 using System.ComponentModel;
-using System.Reflection;
-using PS.Build.Services;
+using System.Runtime.CompilerServices;
 
 namespace DefinitionLibrary.Interface
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public sealed class AllAttribute : Attribute
+    public sealed class AllAttribute : BaseAttribute
     {
+        #region Constructors
+
+        public AllAttribute([CallerFilePath] string file = null) : base(file)
+        {
+        }
+
+        #endregion
+
         #region Members
 
         void PostBuild(IServiceProvider provider)
         {
-            var logger = (ILogger)provider.GetService(typeof(ILogger));
-            var type = GetType();
-            var validOn = type.GetCustomAttribute<AttributeUsageAttribute>().ValidOn;
-            logger.Info(string.Join(",", "PostBuild", validOn, type.Name));
+            BasePostBuild(provider);
         }
 
         void PreBuild(IServiceProvider provider)
         {
-            var logger = (ILogger)provider.GetService(typeof(ILogger));
-            var type = GetType();
-            var validOn = type.GetCustomAttribute<AttributeUsageAttribute>().ValidOn;
-            logger.Info(string.Join(",", "PreBuild", validOn, type.Name));
+            BasePreBuild(provider);
         }
 
         #endregion

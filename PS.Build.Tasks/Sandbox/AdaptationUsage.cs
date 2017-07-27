@@ -35,6 +35,7 @@ namespace PS.Build.Tasks
                                SyntaxTree syntaxTree,
                                SyntaxNode associatedSyntaxNode,
                                AttributeData attributeData,
+                               AttributeTargets attributeTargets,
                                Type type)
         {
             SemanticModel = semanticModel;
@@ -42,6 +43,7 @@ namespace PS.Build.Tasks
             AssociatedSyntaxNode = associatedSyntaxNode;
             AttributeData = attributeData;
             Type = type;
+            AttributeTargets = attributeTargets;
             PreBuildMethod = GetPreBuildMethod(type);
             PostBuildMethod = GetPostBuildMethod(type);
         }
@@ -51,12 +53,12 @@ namespace PS.Build.Tasks
         #region Properties
 
         public SyntaxNode AssociatedSyntaxNode { get; }
-
         public Attribute Attribute { get; set; }
         public AttributeData AttributeData { get; }
-        public MethodInfo PostBuildMethod { get; set; }
+        public AttributeTargets AttributeTargets { get; }
+        public MethodInfo PostBuildMethod { get; }
 
-        public MethodInfo PreBuildMethod { get; set; }
+        public MethodInfo PreBuildMethod { get; }
         public SemanticModel SemanticModel { get; }
 
         public SyntaxTree SyntaxTree { get; }

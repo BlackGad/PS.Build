@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PS.Build.Services;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Tasks.Services;
@@ -15,6 +16,51 @@ namespace PS.Build.Tasks
 {
     public class SandboxClient : MarshalByRefObject
     {
+        #region Static members
+
+        private static IEnumerable<AdaptationUsage> Sort(IList<AdaptationUsage> usages)
+        {
+            var subsets = new List<AdaptationUsage>();
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Assembly));
+
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Field));
+
+            var fieldEvents = usages.Where(u =>
+            {
+                if (u.AttributeTargets != AttributeTargets.Event) return false;
+                return u.AssociatedSyntaxNode.Parent.Parent is BaseFieldDeclarationSyntax;
+            }).ToList();
+
+            subsets.AddRange(fieldEvents);
+
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Parameter));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.ReturnValue));
+            var methodTemplates = usages.Where(u =>
+            {
+                if (u.AttributeTargets != AttributeTargets.GenericParameter) return false;
+                return u.AssociatedSyntaxNode.Parent.Parent is BaseMethodDeclarationSyntax;
+            }).ToList();
+            subsets.AddRange(methodTemplates);
+
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Constructor));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Method));
+            subsets.AddRange(usages.Except(fieldEvents).Where(u => u.AttributeTargets == AttributeTargets.Event));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Property));
+
+            subsets.AddRange(usages.Except(methodTemplates).Where(u => u.AttributeTargets == AttributeTargets.GenericParameter));
+
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Interface));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Enum));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Class));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Struct));
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Delegate));
+
+            subsets.AddRange(usages.Where(u => u.AttributeTargets == AttributeTargets.Module));
+            return subsets;
+        }
+
+        #endregion
+
         private readonly IDynamicVault _dynamicVault;
         private readonly IExplorer _explorer;
         private CSharpCompilation _compilation;
@@ -103,14 +149,16 @@ namespace PS.Build.Tasks
                         var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
                         var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
                         var attributeData = pair.Key.ResolveAttributeData(semanticModel);
-
                         if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
-                        if (attributeData == null) throw new InvalidDataException($"Could not resolve attribute semantic");
+                        if (attributeData?.Item2 == null) throw new InvalidDataException("Could not resolve attribute semantic");
+                        if (attributeData.Item1 == AttributeTargets.All)
+                            throw new InvalidOperationException("Unexpected AttributeTargets in resolved attribute data");
 
                         usages.Add(new AdaptationUsage(semanticModel,
                                                        group.Key,
                                                        pair.Key.Parent.Parent,
-                                                       attributeData,
+                                                       attributeData.Item2,
+                                                       attributeData.Item1,
                                                        resolvedType));
                     }
                     catch (NotSupportedException e)
@@ -150,6 +198,7 @@ namespace PS.Build.Tasks
             foreach (var pair in suspiciousAttributeSyntaxes)
             {
                 logger.Debug($" + Syntax: {pair.Key}");
+                logger.Debug($"   Location: {pair.Key.GetLocation()}");
                 foreach (var type in pair.Value)
                 {
                     logger.Debug($"   * Could be: {type.FullName}");
@@ -190,7 +239,7 @@ namespace PS.Build.Tasks
 
             var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
 
-            foreach (var usage in usages)
+            foreach (var usage in Sort(usages))
             {
                 logger.Debug($"Adaptation: {usage.AttributeData}");
                 var method = usage.PostBuildMethod;
@@ -249,7 +298,7 @@ namespace PS.Build.Tasks
             logger.Info("Executing discovered adaptations with pre build instructions");
             var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
 
-            foreach (var usage in usages)
+            foreach (var usage in Sort(usages))
             {
                 logger.Debug($"Adaptation: {usage.AttributeData}");
                 var method = usage.PreBuildMethod;

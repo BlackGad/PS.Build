@@ -106,11 +106,12 @@ namespace PS.Build.Tasks.Extensions
             return type.FullName == typeName && assemblyName == type.Assembly.GetName().Name;
         }
 
-        public static AttributeData ResolveAttributeData(this AttributeSyntax syntax, SemanticModel model)
+        public static Tuple<AttributeTargets, AttributeData> ResolveAttributeData(this AttributeSyntax syntax, SemanticModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             AttributeData resolvedData;
+            var attributeTargets = AttributeTargets.All;
             var attributeTarget = syntax.Parent.Parent;
             if (attributeTarget is CompilationUnitSyntax)
             {
@@ -118,17 +119,21 @@ namespace PS.Build.Tasks.Extensions
                 if (defineOperator == null) throw new InvalidOperationException("Unknown attribute specifier in CompilationUnitSyntax");
                 if (defineOperator.Identifier.RawKind == (int)SyntaxKind.AssemblyKeyword)
                 {
-                    return model.Compilation
-                                .Assembly
-                                .GetAttributes()
-                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    resolvedData = model.Compilation
+                                        .Assembly
+                                        .GetAttributes()
+                                        .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    attributeTargets = AttributeTargets.Assembly;
+                    return new Tuple<AttributeTargets, AttributeData>(attributeTargets, resolvedData);
                 }
                 if (defineOperator.Identifier.RawKind == (int)SyntaxKind.ModuleKeyword)
                 {
-                    return model.Compilation
-                                .SourceModule
-                                .GetAttributes()
-                                .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    resolvedData = model.Compilation
+                                        .SourceModule
+                                        .GetAttributes()
+                                        .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
+                    attributeTargets = AttributeTargets.Module;
+                    return new Tuple<AttributeTargets, AttributeData>(attributeTargets, resolvedData);
                 }
                 throw new InvalidOperationException("Unknown AttributeTargetSpecifierSyntax near attribute in CompilationUnitSyntax");
             }
@@ -136,26 +141,51 @@ namespace PS.Build.Tasks.Extensions
             var baseFieldDeclarationSyntax = attributeTarget as BaseFieldDeclarationSyntax;
             if (baseFieldDeclarationSyntax != null)
             {
+                if (attributeTarget is EventFieldDeclarationSyntax) attributeTargets = AttributeTargets.Event;
+                if (attributeTarget is FieldDeclarationSyntax) attributeTargets = AttributeTargets.Field;
+
                 foreach (var variable in baseFieldDeclarationSyntax.Declaration.Variables)
                 {
                     resolvedData = ModelExtensions.GetDeclaredSymbol(model, variable)?
                                                   .GetAttributes()
                                                   .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
-                    if (resolvedData != null) return resolvedData;
+                    if (resolvedData != null) return new Tuple<AttributeTargets, AttributeData>(attributeTargets, resolvedData);
                 }
-                throw new InvalidOperationException("Unexpected attribute declaration in FieldDeclarationSyntax");
+                throw new InvalidOperationException("Unexpected attribute declaration in BaseFieldDeclarationSyntax");
             }
 
             var declaredSymbol = model.GetDeclaredSymbol(attributeTarget);
             resolvedData = declaredSymbol?.GetAttributes()
                                           .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
-            if (resolvedData != null) return resolvedData;
+            if (resolvedData != null)
+            {
+                if (attributeTarget is DelegateDeclarationSyntax) attributeTargets = AttributeTargets.Delegate;
+                if (attributeTarget is ClassDeclarationSyntax) attributeTargets = AttributeTargets.Class;
+                if (attributeTarget is ConstructorDeclarationSyntax) attributeTargets = AttributeTargets.Constructor;
+                if (attributeTarget is PropertyDeclarationSyntax) attributeTargets = AttributeTargets.Property;
+                if (attributeTarget is MethodDeclarationSyntax) attributeTargets = AttributeTargets.Method;
+                if (attributeTarget is TypeParameterSyntax) attributeTargets = AttributeTargets.GenericParameter;
+                if (attributeTarget is ParameterSyntax) attributeTargets = AttributeTargets.Parameter;
+                if (attributeTarget is EnumDeclarationSyntax) attributeTargets = AttributeTargets.Enum;
+                if (attributeTarget is InterfaceDeclarationSyntax) attributeTargets = AttributeTargets.Interface;
+                if (attributeTarget is StructDeclarationSyntax) attributeTargets = AttributeTargets.Struct;
+                if (attributeTarget is EnumMemberDeclarationSyntax) attributeTargets = AttributeTargets.Field;
+                if (attributeTarget is EventDeclarationSyntax) attributeTargets = AttributeTargets.Event;
+                if (attributeTarget is IndexerDeclarationSyntax) attributeTargets = AttributeTargets.Property;
+                if (attributeTarget is AccessorDeclarationSyntax) attributeTargets = AttributeTargets.Method;
+
+                return new Tuple<AttributeTargets, AttributeData>(attributeTargets, resolvedData);
+            }
 
             var methodSymbol = declaredSymbol as IMethodSymbol;
             resolvedData = methodSymbol?.GetReturnTypeAttributes()
                                         .FirstOrDefault(a => a.ApplicationSyntaxReference.Span == syntax.Span);
 
-            if (resolvedData != null) return resolvedData;
+            if (resolvedData != null)
+            {
+                attributeTargets = AttributeTargets.ReturnValue;
+                return new Tuple<AttributeTargets, AttributeData>(attributeTargets, resolvedData);
+            }
 
             throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
         }
