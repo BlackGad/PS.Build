@@ -1,14 +1,23 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using PS.Build.Services;
 
 namespace DefinitionLibrary.Assembly
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public sealed class PostBuildAttribute : Attribute
+    public sealed class PostBuildAttribute : BaseAttribute
     {
+        #region Constructors
+
+        public PostBuildAttribute([CallerLineNumber] int position = default(int), [CallerFilePath] string file = null) : base(position, file)
+        {
+        }
+
+        #endregion
+
         #region Members
 
         void PostBuild(IServiceProvider provider)

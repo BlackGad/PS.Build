@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include=".Base\Attribute.cs" />
     <Compile Include="Module\AllAttribute.cs" />
     <Compile Include="Module\EmptyAttribute.cs" />
     <Compile Include="Module\PostBuildAttribute.cs" />

@@ -33,9 +33,11 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Extensions\FluentExtensions.cs" />
     <Compile Include="Services\IArtifactory.cs" />
     <Compile Include="Services\IExplorer.cs" />
     <Compile Include="Services\INugetExplorer.cs" />
+    <Compile Include="Services\IDynamicVault.cs" />
     <Compile Include="Types\IArtifactBuilder.cs" />
     <Compile Include="Types\IArtifactDependenciesBuilder.cs" />
     <Compile Include="Types\IItem.cs" />
