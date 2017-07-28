@@ -18,18 +18,11 @@ To execute defined earlier instructions you must add reference to PS.Build.Tasks
 
 ## How it works
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attributes usage prior to compilation and execute their methods with specific signature.
-## Call order
-Attribute methods calls are strongly ordered.
-<img src="https://cdn.rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>
-
-1. AttributeTargets.Assembly,
-2. AttributeTargets.Field | AttributeTargets.Event, //event as field
-3. AttributeTargets.Parameter | AttributeTargets.ReturnValue | AttributeTargets.GenericParameter, //param of method
-4. AttributeTargets.Constructor | AttributeTargets.Method,
-5. AttributeTargets.Property | AttributeTargets.Event, //event as property
-6. AttributeTargets.GenericParameter, //param of type definition
-7. AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Delegate,
-8. AttributeTargets.Module
+## Method invocation order order
+Attribute methods calls are strongly [ordered](https://github.com/BlackGad/PS.Build/wiki/Method-invocation-order).
+<img src="https://rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>
+<!--https://cdn.rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg-->
+This feature allows you to control cross attribute interaction using [dynamic vault service](https://github.com/BlackGad/PS.Build/wiki/Dynamic-vault-service)
 
 ## Attributes isolation
 It is crucial to keep compiled output in clean state with minimum amount of dependencies. That's why attributes can be isolated in several ways.
