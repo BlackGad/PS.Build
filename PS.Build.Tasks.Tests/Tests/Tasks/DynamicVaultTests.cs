@@ -12,7 +12,7 @@ namespace PS.Build.Tasks.Tests.Tasks
     public class DynamicVaultTests
     {
         [Test]
-        public void AttributeUsageTest()
+        public void Test()
         {
             var targetDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var solutionDirectory = Path.Combine(targetDirectory, @"TestReferences\Projects\DynamicVaultProject\");

@@ -42,11 +42,14 @@ namespace DefinitionLibrary.Assembly
 				@"Invalid macro {boo.Platform:2df} string",
                 @"{prop.Platform}",
                 @"{dir.Project}",
+				@"{nuget.Newtonsoft}",
 				@"{nuget.Newtonsoft.Json}",
 				@"{nuget.Newtonsoft.Json@dir}",
 				@"{nuget.Newtonsoft.Json@id}",
 				@"{nuget.Newtonsoft.Json@ver}",
 				@"{nuget.Newtonsoft.Json@ver:2}",
+				@"{env}",
+				@"{env.windir}",
             };
         }
 

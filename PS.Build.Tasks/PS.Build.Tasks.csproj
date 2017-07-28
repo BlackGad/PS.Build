@@ -137,6 +137,7 @@
     <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
     <Compile Include="Sandbox\DomainAssemblyResolver.cs" />
     <Compile Include="Services\DynamicVault.cs" />
+    <Compile Include="Services\MacroResolver\EnvironmentMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\ExplorerMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\MacroResolver.cs" />
     <Compile Include="Services\MacroResolver\NugetExplorerMacroHandler.cs" />

@@ -21,15 +21,9 @@ namespace PS.Build.Tasks.Services
 
         #region Properties
 
-        string IMacroHandler.ID
-        {
-            get { return nameof(NugetExplorer); }
-        }
+        string IMacroHandler.ID => nameof(NugetExplorer);
 
-        int IMacroHandler.Order
-        {
-            get { return 100; }
-        }
+        int IMacroHandler.Order => 100;
 
         #endregion
 
