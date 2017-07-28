@@ -5,7 +5,7 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    public class ArtifactDependenciesBuilder : IArtifactDependenciesBuilder
+    class ArtifactDependenciesBuilder : IArtifactDependenciesBuilder
     {
         private readonly List<string> _fileDependencies;
         private readonly List<string> _tagDependencies;

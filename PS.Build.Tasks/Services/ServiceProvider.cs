@@ -4,7 +4,7 @@ using PS.Build.Tasks.Extensions;
 
 namespace PS.Build.Tasks.Services
 {
-    public class ServiceProvider : IServiceProvider
+    class ServiceProvider : IServiceProvider
     {
         private readonly Dictionary<Type, object> _services;
 

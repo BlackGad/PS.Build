@@ -7,8 +7,8 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    public class Explorer : MarshalByRefObject,
-                            IExplorer
+    class Explorer : MarshalByRefObject,
+                     IExplorer
     {
         #region Constructors
 

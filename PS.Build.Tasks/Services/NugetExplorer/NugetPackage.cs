@@ -3,7 +3,7 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    public class NugetPackage : INugetPackage
+    class NugetPackage : INugetPackage
     {
         #region Constructors
 
@@ -24,9 +24,13 @@ namespace PS.Build.Tasks.Services
 
         #endregion
 
+        #region Override members
+
         public override string ToString()
         {
             return $"[{Version}] {ID}";
         }
+
+        #endregion
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace PS.Build.Tasks.Extensions
 {
-    public static class RoslynExtensions
+    internal static class RoslynExtensions
     {
         #region Constants
 

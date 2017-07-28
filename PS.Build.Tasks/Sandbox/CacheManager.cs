@@ -8,7 +8,7 @@ using PS.Build.Tasks.Extensions;
 
 namespace PS.Build.Tasks
 {
-    public class CacheManager<TPayload> : IDisposable where TPayload : class
+    class CacheManager<TPayload> : IDisposable where TPayload : class
     {
         private readonly string _intermediatePath;
         private readonly ILogger _logger;

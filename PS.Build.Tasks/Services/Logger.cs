@@ -5,8 +5,8 @@ using ILogger = PS.Build.Services.ILogger;
 
 namespace PS.Build.Tasks.Services
 {
-    internal class Logger : MarshalByRefObject,
-                            ILogger
+    class Logger : MarshalByRefObject,
+                   ILogger
     {
         private readonly TaskLoggingHelper _log;
 

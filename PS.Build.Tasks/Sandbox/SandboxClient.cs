@@ -14,7 +14,7 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks
 {
-    public class SandboxClient : MarshalByRefObject
+    class SandboxClient : MarshalByRefObject
     {
         #region Static members
 

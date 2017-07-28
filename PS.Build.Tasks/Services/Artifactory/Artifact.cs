@@ -6,7 +6,7 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    public class Artifact : IArtifactBuilder
+    class Artifact : IArtifactBuilder
     {
         #region Static members
 

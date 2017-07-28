@@ -19,7 +19,7 @@ namespace DefinitionLibrary.Assembly
             {
                 ValidationResult[] errors;
                 var result = resolver.Resolve(macro, out errors);
-                logger.Info(macro + "->" + result);
+                logger.Info(result);
                 if (errors == null) continue;
                 foreach (var error in errors)
                 {

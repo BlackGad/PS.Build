@@ -3,7 +3,7 @@ using System;
 namespace PS.Build.Tasks.Services
 {
     [Serializable]
-    public class ArtifactCache
+    class ArtifactCache
     {
         #region Properties
 
