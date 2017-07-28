@@ -56,7 +56,7 @@
 			</g>
 			<rect x="0" y="374.146" width="425" height="23" class="st3"/>
 			<text x="193.18" y="388.65" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Assembly</text>		</g>
-		<g id="shape2-7" v:mID="2" v:groupContext="shape" transform="translate(285.998,-304.743)">
+		<g id="shape2-7" v:mID="2" v:groupContext="shape" transform="translate(354.998,-305.535)">
 			<title>Rectangle.2</title>
 			<desc>Field</desc>
 			<v:userDefs>
@@ -70,9 +70,9 @@
 			</g>
 			<rect x="0" y="374.146" width="120" height="23" class="st5"/>
 			<text x="50.29" y="388.65" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Field</text>		</g>
-		<g id="shape3-13" v:mID="3" v:groupContext="shape" transform="translate(144.998,-304.743)">
+		<g id="shape3-13" v:mID="3" v:groupContext="shape" transform="translate(72.4784,-304.743)">
 			<title>Rectangle.3</title>
-			<desc>Event field</desc>
+			<desc>Enumeration field</desc>
 			<v:userDefs>
 				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
 			</v:userDefs>
@@ -83,7 +83,7 @@
 				<rect x="0" y="374.146" width="120" height="23" class="st2"/>
 			</g>
 			<rect x="0" y="374.146" width="120" height="23" class="st5"/>
-			<text x="38.44" y="388.65" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Event field</text>		</g>
+			<text x="23.53" y="388.65" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Enumeration field</text>		</g>
 		<g id="shape4-19" v:mID="4" v:groupContext="shape" transform="translate(72.4784,-259.535)">
 			<title>Rectangle.4</title>
 			<desc>Method parameter</desc>
@@ -294,5 +294,19 @@
 			<path d="M0 397.15 L43.45 385.81 L43.45 391.48 L353.45 391.48 L353.45 397.15 L353.45 402.81 L43.45 402.81 L43.45 408.48
 						 L0 397.15 Z" class="st13"/>
 		</g>
+		<g id="shape21-108" v:mID="21" v:groupContext="shape" transform="translate(213.738,-304.743)">
+			<title>Rectangle.21</title>
+			<desc>Event field</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="60" cy="385.646" width="120.01" height="23"/>
+			<g id="shadow21-109" v:groupContext="shadow" v:shadowOffsetX="0.345598" v:shadowOffsetY="-1.97279" v:shadowType="1"
+					transform="matrix(1,0,0,1,0.345598,1.97279)" class="st1">
+				<rect x="0" y="374.146" width="120" height="23" class="st2"/>
+			</g>
+			<rect x="0" y="374.146" width="120" height="23" class="st5"/>
+			<text x="38.44" y="388.65" class="st4" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Event field</text>		</g>
 	</g>
 </svg>
