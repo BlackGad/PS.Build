@@ -6,7 +6,7 @@ using PS.Build.Services;
 
 namespace PS.Build.Tasks
 {
-    public class Sanbox : IDisposable
+    class Sanbox : IDisposable
     {
         private readonly AppDomain _appDomain;
 

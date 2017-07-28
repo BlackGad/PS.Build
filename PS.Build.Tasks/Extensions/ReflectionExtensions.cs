@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace PS.Build.Tasks.Extensions
 {
-    public static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         #region Static members
 

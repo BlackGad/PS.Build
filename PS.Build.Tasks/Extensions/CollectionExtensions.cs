@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PS.Build.Tasks.Extensions
 {
-    public static class CollectionExtensions
+    internal static class CollectionExtensions
     {
         #region Static members
 

@@ -5,8 +5,8 @@ using System.Reflection;
 
 namespace PS.Build.Tasks
 {
-    public class DomainAssemblyResolver : MarshalByRefObject,
-                                          IDisposable
+    class DomainAssemblyResolver : MarshalByRefObject,
+                                   IDisposable
     {
         #region Static members
 

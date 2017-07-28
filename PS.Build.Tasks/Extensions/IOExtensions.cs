@@ -3,7 +3,7 @@ using System.IO;
 
 namespace PS.Build.Tasks.Extensions
 {
-    public static class IOExtensions
+    internal static class IOExtensions
     {
         #region Static members
 

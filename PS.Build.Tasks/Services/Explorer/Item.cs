@@ -8,8 +8,8 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    public class Item : MarshalByRefObject,
-                        IItem
+    class Item : MarshalByRefObject,
+                 IItem
     {
         #region Property definitions
 

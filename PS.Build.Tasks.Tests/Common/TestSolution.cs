@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -73,6 +74,45 @@ namespace PS.Build.Tasks.Tests.Common
             var result = Projects.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.InvariantCultureIgnoreCase));
             Assert.IsNotNull(result);
             return result;
+        }
+
+        public void RestoreNuget()
+        {
+            var nugetPath = ProjectBeacon.GetNugetToolPath();
+
+            var arguments = new List<string>()
+            {
+                "restore",
+                $"\"{SolutionPath}\"",
+                //$"-SolutionDirectory \"{SolutionDirectory}\"",
+                "-NonInteractive"
+            };
+
+            var argumentsLine = string.Join(" ", arguments);
+            Console.WriteLine(argumentsLine);
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo(nugetPath, argumentsLine)
+                {
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                },
+            };
+
+            process.OutputDataReceived += (sender, args) =>
+            {
+                if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data);
+            };
+            process.ErrorDataReceived += (sender, args) =>
+            {
+                if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data);
+            };
+            process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+            process.WaitForExit();
         }
 
         #endregion

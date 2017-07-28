@@ -5,7 +5,7 @@ namespace PS.Build.Tasks.Extensions
     /// <summary>
     ///     EnumExtensions class provides method(s) which extends native .net method(s) to work with Enums.
     /// </summary>
-    public static class EnumExtensions
+    internal static class EnumExtensions
     {
         #region Static members
 

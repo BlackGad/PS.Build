@@ -10,11 +10,14 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>API for PS.Build.Tasks</description>
 		<releaseNotes/>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations"  />
+    </frameworkAssemblies>
 		<references>
 			<reference file="PS.Build.dll"/>
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\PS.Build\bin\Release\PS.Build.dll" target="lib\net45" />
+		<file src="..\..\PS.Build\bin\Release\PS.Build.dll" target="lib\net452" />
 	</files>
 </package>

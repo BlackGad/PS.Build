@@ -5,7 +5,7 @@ using PS.Build.Types;
 namespace PS.Build.Tasks
 {
     [Serializable]
-    public class SerializableArtifact
+    class SerializableArtifact
     {
         #region Properties
 
