@@ -25,9 +25,9 @@ namespace PS.Build.Tasks.Tests.Tasks
             errors.AddRange(preMessages.AssertContains(3, @"Newtonsoft.Json"));
             errors.AddRange(preMessages.AssertContains(1, @"10.0.3.0"));
             errors.AddRange(preMessages.AssertContains(4, @"10.0"));
-            errors.AddRange(preMessages.AssertContains(1, @"windows"));
             errors.AddRange(preMessages.AssertContains(1, "{env}"));
             errors.AddRange(preMessages.AssertContains(1, "{nuget.Newtonsoft}"));
+            errors.AddRange(preMessages.AssertContains(2, Environment.GetFolderPath(Environment.SpecialFolder.Windows)));
 
             var preWarnings = taskEvents.Warnings;
             errors.AddRange(preWarnings.AssertContains(1, "{boo.Platform:2df}"));
@@ -35,7 +35,9 @@ namespace PS.Build.Tasks.Tests.Tasks
             errors.AddRange(preWarnings.AssertContains(1, "Illegal environment variable"));
             errors.AddRange(preWarnings.AssertContains(1, "Invalid time option"));
             errors.AddRange(preWarnings.AssertContains(1, "Invalid uid option"));
-            Assert.AreEqual(5, preWarnings.Count);
+            errors.AddRange(preWarnings.AssertContains(1, "Invalid SpecialFolder option"));
+            errors.AddRange(preWarnings.AssertContains(1, "Not supported 'notexisted' folder"));
+            Assert.AreEqual(7, preWarnings.Count);
 
             errors.AddRange(taskEvents.Errors.AssertEmpty());
             errors.AddRange(taskEvents.Custom.AssertEmpty());

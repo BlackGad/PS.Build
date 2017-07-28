@@ -82,6 +82,7 @@ namespace PS.Build.Tasks
             _macroResolver.Register(new EnvironmentMacroHandler());
             _macroResolver.Register(new TimeMacroHandler());
             _macroResolver.Register(new UidMacroHandler());
+            _macroResolver.Register(new SpecialDirectoryMacroHandler());
         }
 
         #endregion

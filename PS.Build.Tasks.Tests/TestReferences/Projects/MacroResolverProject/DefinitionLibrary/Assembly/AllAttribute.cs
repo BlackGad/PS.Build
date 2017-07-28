@@ -56,6 +56,9 @@ namespace DefinitionLibrary.Assembly
 				@"{uid}",
 				@"{uid.new}",
 				@"{uid.new:N}",
+                @"{sdir}",
+                @"{sdir.notexisted}",
+                @"{sdir.windows}",
             };
         }
 

@@ -141,6 +141,7 @@
     <Compile Include="Services\MacroResolver\ExplorerMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\MacroResolver.cs" />
     <Compile Include="Services\MacroResolver\NugetExplorerMacroHandler.cs" />
+    <Compile Include="Services\MacroResolver\SpecialDirectoryMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\TimeMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\UidMacroHandler.cs" />
     <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
