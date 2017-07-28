@@ -36,8 +36,11 @@
     <Compile Include="Extensions\FluentExtensions.cs" />
     <Compile Include="Services\IArtifactory.cs" />
     <Compile Include="Services\IExplorer.cs" />
+    <Compile Include="Services\IMacroResolver.cs" />
     <Compile Include="Services\INugetExplorer.cs" />
     <Compile Include="Services\IDynamicVault.cs" />
+    <Compile Include="Types\IMacroHandler.cs" />
+    <Compile Include="Types\HandledMacro.cs" />
     <Compile Include="Types\IArtifactBuilder.cs" />
     <Compile Include="Types\IArtifactDependenciesBuilder.cs" />
     <Compile Include="Types\IItem.cs" />
@@ -54,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

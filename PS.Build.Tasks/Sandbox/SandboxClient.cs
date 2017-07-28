@@ -63,6 +63,8 @@ namespace PS.Build.Tasks
 
         private readonly IDynamicVault _dynamicVault;
         private readonly IExplorer _explorer;
+        private readonly MacroResolver _macroResolver;
+        private readonly NugetExplorer _nugetExplorer;
         private CSharpCompilation _compilation;
         private List<AdaptationUsage> _usages;
 
@@ -73,6 +75,10 @@ namespace PS.Build.Tasks
             if (explorer == null) throw new ArgumentNullException(nameof(explorer));
             _explorer = explorer;
             _dynamicVault = new DynamicVault();
+            _nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
+            _macroResolver = new MacroResolver();
+            _macroResolver.Register(new ExplorerMacroHandler(_explorer));
+            _macroResolver.Register(new NugetExplorerMacroHandler(_nugetExplorer));
         }
 
         #endregion
@@ -237,8 +243,6 @@ namespace PS.Build.Tasks
 
             logger.Info("Executing discovered adaptations with post build instructions");
 
-            var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
-
             foreach (var usage in Sort(usages))
             {
                 logger.Debug($"Adaptation: {usage.AttributeData}");
@@ -272,8 +276,9 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
                     serviceProvider.AddService(typeof(ILogger), logger);
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
-                    serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
                     serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
+                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
 
                     method.Invoke(attribute, new object[] { serviceProvider });
                 }
@@ -296,7 +301,6 @@ namespace PS.Build.Tasks
             }
 
             logger.Info("Executing discovered adaptations with pre build instructions");
-            var nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
 
             foreach (var usage in Sort(usages))
             {
@@ -332,8 +336,9 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(ILogger), logger);
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(IArtifactory), artifactory);
-                    serviceProvider.AddService(typeof(INugetExplorer), nugetExplorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
                     serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
+                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
 
                     method.Invoke(attribute, new object[] { serviceProvider });
 

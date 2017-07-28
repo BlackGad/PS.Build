@@ -10,11 +10,14 @@
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>Package contains essentials attributes for PS.Build</description>
 		<releaseNotes/>
+    <dependencies>
+      <dependency id="PS.Build" version="$version$" />
+    </dependencies>
 		<references>
 			<reference file="PS.Build.Essentials.dll"/>
 		</references>
 	</metadata>
 	<files>
-		<file src="..\..\PS.Build.Essentials\bin\Release\PS.Build.Essentials.dll" target="lib\net45" />
+		<file src="..\..\PS.Build.Essentials\bin\Release\PS.Build.Essentials.dll" target="lib\net452" />
 	</files>
 </package>
