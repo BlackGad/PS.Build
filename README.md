@@ -17,10 +17,60 @@ Build process extending have 2 logical parts
 
 To execute defined earlier instructions you must add reference to [PS.Build.Tasks](https://www.nuget.org/packages/PS.Build.Tasks/) nuget package and apply attributes to relevant elements. **NOTE**: attribute definition must be in separate assembly. Adaptation definition and usage in same assembly not implemented yet (Technically it is possible but whole build process time will be dramatically increased). 
 
+Adaptation definition example:
+```csharp
+using System;
+using System.ComponentModel;
+using PS.Build.Extensions;
+using PS.Build.Services;
+
+namespace Test
+{
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
+    [Designer("PS.Build.Adaptation")]
+    public sealed class AdaptationAttribute : Attribute
+    {
+        private readonly int _essentialQuestion;
+
+        #region Constructors
+
+        public AdaptationAttribute(int essentialQuestion)
+        {
+            _essentialQuestion = essentialQuestion;
+        }
+
+        #endregion
+
+        #region Members
+
+        void PostBuild(IServiceProvider provider)
+        {
+            var logger = provider.GetService<ILogger>();
+            logger.Info("Goodbye cruel world");
+        }
+
+        void PreBuild(IServiceProvider provider)
+        {
+            var logger = provider.GetService<ILogger>();
+            logger.Info("Hello world");
+            logger.Info("The answer is: " + _essentialQuestion);
+        }
+
+        #endregion
+    }
+}
+```
+
+Adaptation usage example:
+```csharp
+using Test;
+
+[assembly: Adaptation]
+```
 ## How it works
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attributes usage prior to compilation and execute their methods with specific signature.
-## Adaptation method invocation order
-Attribute methods calls are strongly [ordered](https://github.com/BlackGad/PS.Build/wiki/Method-invocation-order).
+## Adaptation methods invocation order
+Adaptation methods calls are strongly [ordered](https://github.com/BlackGad/PS.Build/wiki/Method-invocation-order).
 <img src="https://rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>
 <!--<img src="https://cdn.rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>-->
 This feature allows you to control cross attribute interaction using [dynamic vault service](https://github.com/BlackGad/PS.Build/wiki/Dynamic-vault-service)
