@@ -80,6 +80,7 @@ namespace PS.Build.Tasks
             _macroResolver.Register(new ExplorerMacroHandler(_explorer));
             _macroResolver.Register(new NugetExplorerMacroHandler(_nugetExplorer));
             _macroResolver.Register(new EnvironmentMacroHandler());
+            _macroResolver.Register(new TimeMacroHandler());
         }
 
         #endregion

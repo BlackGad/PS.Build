@@ -50,6 +50,9 @@ namespace DefinitionLibrary.Assembly
 				@"{nuget.Newtonsoft.Json@ver:2}",
 				@"{env}",
 				@"{env.windir}",
+				@"{time}",
+				@"{time.now}",
+				@"{time.now:t}",
             };
         }
 

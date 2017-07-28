@@ -141,6 +141,7 @@
     <Compile Include="Services\MacroResolver\ExplorerMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\MacroResolver.cs" />
     <Compile Include="Services\MacroResolver\NugetExplorerMacroHandler.cs" />
+    <Compile Include="Services\MacroResolver\TimeMacroHandler.cs" />
     <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
     <Compile Include="Services\ServiceProvider.cs" />
     <Compile Include="Services\Artifactory\ArtifactCache.cs" />
