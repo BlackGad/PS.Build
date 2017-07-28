@@ -18,10 +18,10 @@ To execute defined earlier instructions you must add reference to PS.Build.Tasks
 
 ## How it works
 [PS.Build.Tasks nuget package](https://www.nuget.org/packages/PS.Build.Tasks/) contains [MSBuild task](https://msdn.microsoft.com/en-us/library/t9883dzc.aspx) which uses [Roslyn](https://github.com/dotnet/roslyn) engine to analyze target assembly source code for adaptation attributes usage prior to compilation and execute their methods with specific signature.
-## Method invocation order order
+## Adaptation method invocation order
 Attribute methods calls are strongly [ordered](https://github.com/BlackGad/PS.Build/wiki/Method-invocation-order).
 <img src="https://rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>
-<!--https://cdn.rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg-->
+<!--<img src="https://cdn.rawgit.com/BlackGad/PS.Build/master/.Assets/ExecutionOrder.svg"/>-->
 This feature allows you to control cross attribute interaction using [dynamic vault service](https://github.com/BlackGad/PS.Build/wiki/Dynamic-vault-service)
 
 ## Attributes isolation
