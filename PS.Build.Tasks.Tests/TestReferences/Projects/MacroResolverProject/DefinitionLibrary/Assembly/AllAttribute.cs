@@ -53,6 +53,9 @@ namespace DefinitionLibrary.Assembly
 				@"{time}",
 				@"{time.now}",
 				@"{time.now:t}",
+				@"{uid}",
+				@"{uid.new}",
+				@"{uid.new:N}",
             };
         }
 

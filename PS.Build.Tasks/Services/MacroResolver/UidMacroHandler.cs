@@ -4,11 +4,11 @@ using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services
 {
-    class TimeMacroHandler : IMacroHandler
+    class UidMacroHandler : IMacroHandler
     {
         #region Properties
 
-        public string ID => "time";
+        public string ID => "uid";
 
         int IMacroHandler.Order => 100;
 
@@ -18,7 +18,7 @@ namespace PS.Build.Tasks.Services
 
         bool IMacroHandler.CanHandle(string key, string value, string formatting)
         {
-            return string.Equals(key, "time", StringComparison.InvariantCultureIgnoreCase);
+            return string.Equals(key, "uid", StringComparison.InvariantCultureIgnoreCase);
         }
 
         HandledMacro IMacroHandler.Handle(string key, string value, string formatting)
@@ -26,8 +26,10 @@ namespace PS.Build.Tasks.Services
             if (string.IsNullOrWhiteSpace(value)) return new HandledMacro(new ValidationResult($"Invalid {ID} option"));
             switch (value.ToLowerInvariant())
             {
-                case "now":
-                    return new HandledMacro(DateTimeOffset.Now.ToString(formatting));
+                case "empty":
+                    return new HandledMacro(Guid.Empty.ToString(formatting));
+                case "new":
+                    return new HandledMacro(Guid.NewGuid().ToString(formatting));
             }
 
             return new HandledMacro(new ValidationResult($"Not supported {ID} option"));

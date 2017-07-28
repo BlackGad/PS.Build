@@ -33,8 +33,9 @@ namespace PS.Build.Tasks.Tests.Tasks
             errors.AddRange(preWarnings.AssertContains(1, "{boo.Platform:2df}"));
             errors.AddRange(preWarnings.AssertContains(1, "Package 'Newtonsoft' not found"));
             errors.AddRange(preWarnings.AssertContains(1, "Illegal environment variable"));
-            errors.AddRange(preWarnings.AssertContains(1, "Unknown time option"));
-            Assert.AreEqual(4, preWarnings.Count);
+            errors.AddRange(preWarnings.AssertContains(1, "Invalid time option"));
+            errors.AddRange(preWarnings.AssertContains(1, "Invalid uid option"));
+            Assert.AreEqual(5, preWarnings.Count);
 
             errors.AddRange(taskEvents.Errors.AssertEmpty());
             errors.AddRange(taskEvents.Custom.AssertEmpty());
