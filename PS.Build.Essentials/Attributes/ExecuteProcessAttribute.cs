@@ -4,6 +4,7 @@ using System.Diagnostics;
 using PS.Build.Essentials.Extensions;
 using PS.Build.Extensions;
 using PS.Build.Services;
+using PS.Build.Types;
 
 namespace PS.Build.Essentials.Attributes
 {
@@ -14,11 +15,11 @@ namespace PS.Build.Essentials.Attributes
     /// </summary>
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public sealed class PostBuildExecuteProcessAttribute : Attribute
+    public class ExecuteProcessAttribute : Attribute
     {
         #region Constructors
 
-        public PostBuildExecuteProcessAttribute(string filename)
+        public ExecuteProcessAttribute(string filename)
         {
             if (filename == null) throw new ArgumentNullException("filename");
             Filename = filename;
@@ -26,6 +27,7 @@ namespace PS.Build.Essentials.Attributes
             CreateNoWindow = true;
             WindowStyle = ProcessWindowStyle.Hidden;
             WaitForProcessExit = true;
+            BuildStep = BuildStep.PostBuild;
         }
 
         #endregion
@@ -36,6 +38,11 @@ namespace PS.Build.Essentials.Attributes
         ///     Gets or sets the set of command-line arguments to use when starting the application.
         /// </summary>
         public string Arguments { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether to start the process.
+        /// </summary>
+        public BuildStep BuildStep { get; set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether to start the process in a new window.
@@ -59,7 +66,7 @@ namespace PS.Build.Essentials.Attributes
         /// <summary>
         ///     Gets the application or document to start.
         /// </summary>
-        public string Filename { get; private set; }
+        public string Filename { get; protected set; }
 
         /// <summary>
         ///     Gets or sets a secure string that contains the user password to use when starting the process.
@@ -96,7 +103,7 @@ namespace PS.Build.Essentials.Attributes
 
         #region Members
 
-        private void PostBuild(IServiceProvider provider)
+        protected virtual void StartProcess(IServiceProvider provider)
         {
             var logger = provider.GetService<ILogger>();
             var macroResolver = provider.GetService<IMacroResolver>();
@@ -152,6 +159,16 @@ namespace PS.Build.Essentials.Attributes
             {
                 logger.Error("Process execution failed. Details: " + e.GetBaseException().Message);
             }
+        }
+
+        private void PostBuild(IServiceProvider provider)
+        {
+            if (BuildStep.HasFlag(BuildStep.PostBuild)) StartProcess(provider);
+        }
+
+        private void PreBuild(IServiceProvider provider)
+        {
+            if (BuildStep.HasFlag(BuildStep.PreBuild)) StartProcess(provider);
         }
 
         #endregion
