@@ -157,7 +157,7 @@ namespace PS.Build.Tasks
                     {
                         var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
                         var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
-                        var resolvedType = pair.Value.FirstOrDefault(t => symbol.IsEquivalent(t));
+                        var resolvedType = pair.Value.FirstOrDefault(t => symbol.ResolveType() == t);
                         var attributeData = pair.Key.ResolveAttributeData(semanticModel);
                         if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
                         if (attributeData?.Item2 == null) throw new InvalidDataException("Could not resolve attribute semantic");
@@ -262,7 +262,7 @@ namespace PS.Build.Tasks
                 {
                     try
                     {
-                        attribute = usage.AttributeData.CreateAttribute(usage.Type);
+                        attribute = usage.AttributeData.CreateAttribute();
                     }
                     catch (Exception e)
                     {
@@ -319,7 +319,7 @@ namespace PS.Build.Tasks
                 Attribute attribute;
                 try
                 {
-                    attribute = usage.AttributeData.CreateAttribute(usage.Type);
+                    attribute = usage.AttributeData.CreateAttribute();
                     usage.Attribute = attribute;
                 }
                 catch (Exception e)

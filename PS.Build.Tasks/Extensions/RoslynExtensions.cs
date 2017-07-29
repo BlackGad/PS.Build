@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,35 +9,9 @@ namespace PS.Build.Tasks.Extensions
 {
     internal static class RoslynExtensions
     {
-        #region Constants
-
-        private const string SystemNamespace = "System.";
-
-        private static readonly Dictionary<string, string> MapConcreteTypeToPredefinedTypeAlias =
-            new Dictionary<string, string>
-            {
-                { "short", SystemNamespace + nameof(Int16) },
-                { "int", SystemNamespace + nameof(Int32) },
-                { "long", SystemNamespace + nameof(Int64) },
-                { "ushort", SystemNamespace + nameof(UInt16) },
-                { "uint", SystemNamespace + nameof(UInt32) },
-                { "ulong", SystemNamespace + nameof(UInt64) },
-                { "object", SystemNamespace + nameof(Object) },
-                { "byte", SystemNamespace + nameof(Byte) },
-                { "sbyte", SystemNamespace + nameof(SByte) },
-                { "char", SystemNamespace + nameof(Char) },
-                { "bool", SystemNamespace + nameof(Boolean) },
-                { "float", SystemNamespace + nameof(Single) },
-                { "double", SystemNamespace + nameof(Double) },
-                { "decimal", SystemNamespace + nameof(Decimal) },
-                { "string", SystemNamespace + nameof(String) }
-            };
-
-        #endregion
-
         #region Static members
 
-        public static Attribute CreateAttribute(this AttributeData data, Type type)
+        public static Attribute CreateAttribute(this AttributeData data)
         {
             var ctorArgumentsWithError = data.ConstructorArguments.Where(a => a.Kind == TypedConstantKind.Error).ToList();
             if (ctorArgumentsWithError.Any())
@@ -45,82 +19,33 @@ namespace PS.Build.Tasks.Extensions
                 throw new ArgumentException($"{data} attribute arguments could not be parsed");
             }
 
-            var valueSequence = new List<object>();
-
-            var availableCtors = type.GetConstructors().Select(c => new
-            {
-                ctor = c,
-                args = c.GetParameters()
-            }).ToList();
-
-            if (data.AttributeConstructor != null)
-            {
-                for (var i = 0; i < data.AttributeConstructor.Parameters.Length; i++)
-                {
-                    var localIndex = i;
-                    var constructorArgument = data.ConstructorArguments[i];
-
-                    var tuple = constructorArgument.ExtractValue();
-                    valueSequence.Add(i < data.ConstructorArguments.Length
-                        ? tuple.Item2
-                        : null);
-
-                    var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
-                                                                 c.args[localIndex].ParameterType != tuple.Item1)
-                                                     .ToList();
-                    invalidCtors.ForEach(c => availableCtors.Remove(c));
-                }
-            }
-
-            var ctor = availableCtors.FirstOrDefault();
-            if (ctor == null)
-            {
-                throw new ArgumentException("There is no appropriate public constructor available");
-            }
-
-            var attribute = ctor.ctor.Invoke(valueSequence.ToArray()) as Attribute;
+            var type = data.AttributeClass.ResolveType();
+            var args = data.ConstructorArguments.Select(a => a.ExtractValue()).ToArray();
+            var attribute = Activator.CreateInstance(type,
+                                                     BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
+                                                     null,
+                                                     args,
+                                                     null);
             foreach (var namedArgument in data.NamedArguments)
             {
-                type.GetProperty(namedArgument.Key).SetValue(attribute, namedArgument.Value.ExtractValue().Item2);
+                type.GetProperty(namedArgument.Key).SetValue(attribute, namedArgument.Value.ExtractValue());
             }
-            return attribute;
+
+            return (Attribute)attribute;
         }
 
-        public static Tuple<Type, object> ExtractValue(this TypedConstant constant)
+        public static object ExtractValue(this TypedConstant constant)
         {
-            Type resultType;
-            object resultValue;
-
             var arrayType = constant.Type as IArrayTypeSymbol;
-            if (arrayType != null)
+            if (arrayType == null) return constant.Value;
+
+            var elementType = arrayType.ElementType.ResolveType();
+            var array = Array.CreateInstance(elementType, constant.Values.Length);
+            for (var i = 0; i < constant.Values.Length; i++)
             {
-                var elementType = arrayType.ElementType.ResolveType();
-                var array = Array.CreateInstance(elementType, constant.Values.Length);
-                resultType = array.GetType();
-                for (var i = 0; i < constant.Values.Length; i++)
-                {
-                    array.SetValue(constant.Values[i].ExtractValue().Item2, i);
-                }
-                resultValue = array;
+                array.SetValue(constant.Values[i].ExtractValue(), i);
             }
-            else
-            {
-                resultType = constant.Type.ResolveType();
-                resultValue = constant.Value;
-            }
-
-            return new Tuple<Type, object>(resultType, resultValue);
-        }
-
-        public static bool IsEquivalent(this ISymbol symbol, Type type)
-        {
-            if (symbol == null) return false;
-            if (type == null) return false;
-
-            var typeName = symbol.ContainingType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
-            var assemblyName = symbol.ContainingAssembly.Identity.Name;
-
-            return type.FullName == typeName && assemblyName == type.Assembly.GetName().Name;
+            return array;
         }
 
         public static Tuple<AttributeTargets, AttributeData> ResolveAttributeData(this AttributeSyntax syntax, SemanticModel model)
@@ -207,19 +132,72 @@ namespace PS.Build.Tasks.Extensions
             throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
         }
 
-        public static Type ResolveType(this ITypeSymbol namedSymbol)
+        public static Type ResolveType(this ISymbol symbol)
         {
-            var typeName = namedSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(typeName))
-                typeName = MapConcreteTypeToPredefinedTypeAlias[typeName];
+            if (symbol.ContainingAssembly == null) return null;
 
-            var resultType = Type.GetType(typeName);
-            var globalPrefix = "global::";
-            if (resultType == null && typeName.StartsWith(globalPrefix))
+            var typeSymbol = symbol as ITypeSymbol;
+            if (typeSymbol != null)
             {
-                resultType = Type.GetType(typeName.Substring(globalPrefix.Length));
+                switch (typeSymbol.SpecialType)
+                {
+                    case SpecialType.System_Object:
+                        return typeof(object);
+                    case SpecialType.System_Enum:
+                        return typeof(Enum);
+                    case SpecialType.System_MulticastDelegate:
+                        return typeof(MulticastDelegate);
+                    case SpecialType.System_Delegate:
+                        return typeof(Delegate);
+                    case SpecialType.System_Void:
+                        return typeof(void);
+                    case SpecialType.System_Boolean:
+                        return typeof(bool);
+                    case SpecialType.System_Char:
+                        return typeof(char);
+                    case SpecialType.System_SByte:
+                        return typeof(sbyte);
+                    case SpecialType.System_Byte:
+                        return typeof(byte);
+                    case SpecialType.System_Int16:
+                        return typeof(short);
+                    case SpecialType.System_UInt16:
+                        return typeof(ushort);
+                    case SpecialType.System_Int32:
+                        return typeof(int);
+                    case SpecialType.System_UInt32:
+                        return typeof(uint);
+                    case SpecialType.System_Int64:
+                        return typeof(long);
+                    case SpecialType.System_UInt64:
+                        return typeof(ulong);
+                    case SpecialType.System_Decimal:
+                        return typeof(decimal);
+                    case SpecialType.System_Single:
+                        return typeof(float);
+                    case SpecialType.System_Double:
+                        return typeof(double);
+                    case SpecialType.System_String:
+                        return typeof(string);
+                    case SpecialType.System_IntPtr:
+                        return typeof(IntPtr);
+                    case SpecialType.System_UIntPtr:
+                        return typeof(UIntPtr);
+                    case SpecialType.System_DateTime:
+                        return typeof(DateTime);
+                    case SpecialType.System_ArgIterator:
+                        return typeof(ArgIterator);
+                }
             }
-            return resultType;
+
+            var containingType = symbol.ContainingType ??
+                                 (symbol as INamedTypeSymbol)?.ConstructedFrom;
+
+            if (containingType == null) return null;
+            var typeName = string.Join(",",
+                                       containingType.ToDisplayString(),
+                                       symbol.ContainingAssembly.ToDisplayString());
+            return Type.GetType(typeName);
         }
 
         #endregion
