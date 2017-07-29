@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using PS.Build.Essentials.Extensions;
+using PS.Build.Extensions;
 using PS.Build.Services;
 
 namespace PS.Build.Essentials.Attributes
@@ -97,7 +98,8 @@ namespace PS.Build.Essentials.Attributes
 
         private void PostBuild(IServiceProvider provider)
         {
-            var logger = (ILogger)provider.GetService(typeof(ILogger));
+            var logger = provider.GetService<ILogger>();
+            var macroResolver = provider.GetService<IMacroResolver>();
             try
             {
                 var startInfo = new ProcessStartInfo
@@ -105,12 +107,12 @@ namespace PS.Build.Essentials.Attributes
                     Arguments = Arguments,
                     CreateNoWindow = CreateNoWindow,
                     Domain = Domain,
-                    FileName = Filename,
+                    FileName = macroResolver.Resolve(Filename),
                     Password = Password.ToSecureString(),
                     UserName = Username,
                     UseShellExecute = UseShellExecute,
                     WindowStyle = WindowStyle,
-                    WorkingDirectory = WorkingDirectory,
+                    WorkingDirectory = macroResolver.Resolve(WorkingDirectory),
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 };
@@ -123,7 +125,8 @@ namespace PS.Build.Essentials.Attributes
                         logger.Error("Environment variable: " + keyValue + " invalid");
                         return;
                     }
-                    startInfo.EnvironmentVariables.Add(keyValue[0], keyValue[1]);
+                    startInfo.EnvironmentVariables.Add(macroResolver.Resolve(keyValue[0]),
+                                                       macroResolver.Resolve(keyValue[1]));
                 }
 
                 var process = new Process
