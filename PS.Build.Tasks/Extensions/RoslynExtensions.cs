@@ -59,23 +59,14 @@ namespace PS.Build.Tasks.Extensions
                 {
                     var localIndex = i;
                     var constructorArgument = data.ConstructorArguments[i];
-                    var argumentTypeName = constructorArgument.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                    if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(argumentTypeName))
-                        argumentTypeName = MapConcreteTypeToPredefinedTypeAlias[argumentTypeName];
 
-                    var argumentType = Type.GetType(argumentTypeName);
-                    var globalPrefix = "global::";
-                    if (argumentType == null && argumentTypeName.StartsWith(globalPrefix))
-                    {
-                        argumentType = Type.GetType(argumentTypeName.Substring(globalPrefix.Length));
-                    }
-
+                    var tuple = constructorArgument.ExtractValue();
                     valueSequence.Add(i < data.ConstructorArguments.Length
-                        ? constructorArgument.Value
+                        ? tuple.Item2
                         : null);
 
                     var invalidCtors = availableCtors.Where(c => localIndex >= c.args.Length ||
-                                                                 c.args[localIndex].ParameterType != argumentType)
+                                                                 c.args[localIndex].ParameterType != tuple.Item1)
                                                      .ToList();
                     invalidCtors.ForEach(c => availableCtors.Remove(c));
                 }
@@ -90,9 +81,35 @@ namespace PS.Build.Tasks.Extensions
             var attribute = ctor.ctor.Invoke(valueSequence.ToArray()) as Attribute;
             foreach (var namedArgument in data.NamedArguments)
             {
-                type.GetProperty(namedArgument.Key).SetValue(attribute, namedArgument.Value.Value);
+                type.GetProperty(namedArgument.Key).SetValue(attribute, namedArgument.Value.ExtractValue().Item2);
             }
             return attribute;
+        }
+
+        public static Tuple<Type, object> ExtractValue(this TypedConstant constant)
+        {
+            Type resultType;
+            object resultValue;
+
+            var arrayType = constant.Type as IArrayTypeSymbol;
+            if (arrayType != null)
+            {
+                var elementType = arrayType.ElementType.ResolveType();
+                var array = Array.CreateInstance(elementType, constant.Values.Length);
+                resultType = array.GetType();
+                for (var i = 0; i < constant.Values.Length; i++)
+                {
+                    array.SetValue(constant.Values[i].ExtractValue().Item2, i);
+                }
+                resultValue = array;
+            }
+            else
+            {
+                resultType = constant.Type.ResolveType();
+                resultValue = constant.Value;
+            }
+
+            return new Tuple<Type, object>(resultType, resultValue);
         }
 
         public static bool IsEquivalent(this ISymbol symbol, Type type)
@@ -188,6 +205,21 @@ namespace PS.Build.Tasks.Extensions
             }
 
             throw new NotSupportedException($"Cannot resolve attribute data Location: {syntax.SyntaxTree.GetLineSpan(syntax.Span)}, Syntax: {syntax}");
+        }
+
+        public static Type ResolveType(this ITypeSymbol namedSymbol)
+        {
+            var typeName = namedSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            if (MapConcreteTypeToPredefinedTypeAlias.ContainsKey(typeName))
+                typeName = MapConcreteTypeToPredefinedTypeAlias[typeName];
+
+            var resultType = Type.GetType(typeName);
+            var globalPrefix = "global::";
+            if (resultType == null && typeName.StartsWith(globalPrefix))
+            {
+                resultType = Type.GetType(typeName.Substring(globalPrefix.Length));
+            }
+            return resultType;
         }
 
         #endregion
