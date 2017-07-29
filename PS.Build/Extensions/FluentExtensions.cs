@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using PS.Build.Services;
 
 namespace PS.Build.Extensions
@@ -17,6 +18,12 @@ namespace PS.Build.Extensions
             object value;
             if (vault.Query(typeof(T), out value)) return (T)value;
             return default(T);
+        }
+
+        public static string Resolve(this IMacroResolver resolver, string source)
+        {
+            ValidationResult[] errors;
+            return resolver.Resolve(source, out errors);
         }
 
         public static T Store<T>(this IDynamicVault vault, T value)

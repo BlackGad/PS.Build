@@ -39,6 +39,7 @@
     <Compile Include="Services\IMacroResolver.cs" />
     <Compile Include="Services\INugetExplorer.cs" />
     <Compile Include="Services\IDynamicVault.cs" />
+    <Compile Include="Types\BuildStep.cs" />
     <Compile Include="Types\IMacroHandler.cs" />
     <Compile Include="Types\HandledMacro.cs" />
     <Compile Include="Types\IArtifactBuilder.cs" />

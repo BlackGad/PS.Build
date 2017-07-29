@@ -11,20 +11,36 @@ namespace PS.Build.Tasks
 
         public static MethodInfo GetPostBuildMethod(Type t)
         {
-            var method = t.GetMethod("PostBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameters = method?.GetParameters();
-            if (parameters?.Length != 1) return null;
-            if (parameters.First().ParameterType != typeof(IServiceProvider)) return null;
-            return method;
+            var baseType = t;
+            while (baseType != null)
+            {
+                var method = baseType.GetMethod("PostBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                var parameters = method?.GetParameters();
+                if (parameters?.Length == 1 && parameters.First().ParameterType == typeof(IServiceProvider))
+                {
+                    return method;
+                }
+
+                baseType = baseType.BaseType;
+            }
+            return null;
         }
 
         public static MethodInfo GetPreBuildMethod(Type t)
         {
-            var method = t.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var parameters = method?.GetParameters();
-            if (parameters?.Length != 1) return null;
-            if (parameters.First().ParameterType != typeof(IServiceProvider)) return null;
-            return method;
+            var baseType = t;
+            while (baseType != null)
+            {
+                var method = baseType.GetMethod("PreBuild", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                var parameters = method?.GetParameters();
+                if (parameters?.Length == 1 && parameters.First().ParameterType == typeof(IServiceProvider))
+                {
+                    return method;
+                }
+
+                baseType = baseType.BaseType;
+            }
+            return null;
         }
 
         #endregion
