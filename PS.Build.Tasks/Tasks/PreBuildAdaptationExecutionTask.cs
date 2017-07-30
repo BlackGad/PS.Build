@@ -146,14 +146,19 @@ namespace PS.Build.Tasks
         public string PropertyConfiguration { get; set; }
 
         [Required]
-        public string PropertyPlatform { get; set; } [Required]
-        public string PropertyTargetPath { get; set; }
+        public string PropertyPlatform { get; set; }
 
         [Required]
         public string PropertyProjectFile { get; set; }
 
         [Required]
         public string PropertyRootNamespace { get; set; }
+
+        [Required]
+        public string PropertyTargetFrameworkVersion { get; set; }
+
+        [Required]
+        public string PropertyTargetPath { get; set; }
 
         [Required]
         public ITaskItem[] References { get; set; }

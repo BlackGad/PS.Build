@@ -38,6 +38,7 @@
 			PropertyPlatform="$(Platform)"
 			PropertyConfiguration="$(Configuration)"
 			PropertyRootNamespace="$(RootNamespace)"
+			PropertyTargetFrameworkVersion="$(TargetFrameworkVersion)"
 
 			DirectoryIntermediate="$(IntermediateOutputPath)"
 			DirectoryProject="$(MSBuildProjectDirectory)"

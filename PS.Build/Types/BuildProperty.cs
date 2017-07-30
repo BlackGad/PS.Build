@@ -34,6 +34,12 @@ namespace PS.Build.Types
         ///     The absolute path name of the primary output file for the build (defined as drive + path + base name + file
         ///     extension).
         /// </summary>
-        TargetPath
+        TargetPath,
+
+        /// <summary>
+        ///     The absolute path name of the primary output file for the build (defined as drive + path + base name + file
+        ///     extension).
+        /// </summary>
+        TargetFrameworkVersion,
     }
 }
