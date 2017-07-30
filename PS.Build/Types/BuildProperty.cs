@@ -28,6 +28,12 @@ namespace PS.Build.Types
         ///     The root namespace to use when you name an embedded resource. This namespace is part of the embedded resource
         ///     manifest name.
         /// </summary>
-        RootNamespace
+        RootNamespace,
+
+        /// <summary>
+        ///     The absolute path name of the primary output file for the build (defined as drive + path + base name + file
+        ///     extension).
+        /// </summary>
+        TargetPath
     }
 }

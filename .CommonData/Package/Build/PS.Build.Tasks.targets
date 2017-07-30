@@ -34,6 +34,7 @@
 			References="@(ReferencePath)" 
 
 			PropertyProjectFile="$(MSBuildProjectFile)"			
+			PropertyTargetPath="$(TargetPath)"			
 			PropertyPlatform="$(Platform)"
 			PropertyConfiguration="$(Configuration)"
 			PropertyRootNamespace="$(RootNamespace)"
