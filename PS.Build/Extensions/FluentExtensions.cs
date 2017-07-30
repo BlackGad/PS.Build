@@ -23,7 +23,11 @@ namespace PS.Build.Extensions
             T result = default(T);
             object vaultData;
             var key = typeof(T).FullName + vaultKey;
-            if (vault.Query(key, out vaultData)) return result;
+            if (vault.Query(key, out vaultData))
+            {
+                result = (T)vaultData;
+                return result;
+            }
 
             if (createFactory != null) result = createFactory();
             vault.Store(key, result);
