@@ -13,11 +13,21 @@ namespace PS.Build.Extensions
             return (T)provider.GetService(typeof(T));
         }
 
-        public static T Query<T>(this IDynamicVault vault)
+        public static T Query<T>(this IDynamicVault vault, Func<T> createFactory = null)
         {
-            object value;
-            if (vault.Query(typeof(T), out value)) return (T)value;
-            return default(T);
+            return vault.Query<T>(null, createFactory);
+        }
+
+        public static T Query<T>(this IDynamicVault vault, string vaultKey, Func<T> createFactory = null)
+        {
+            T result = default(T);
+            object vaultData;
+            if (vault.Query(typeof(T).FullName + vaultKey, out vaultData)) return result;
+
+            if (createFactory != null) result = createFactory();
+            vault.Store(vaultKey, result);
+
+            return result;
         }
 
         public static string Resolve(this IMacroResolver resolver, string source)
