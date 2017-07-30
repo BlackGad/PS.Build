@@ -37,6 +37,16 @@ namespace PS.Build.Types
         TargetPath,
 
         /// <summary>
+        ///     The base name of the primary output file for the build.
+        /// </summary>
+        TargetName,
+
+        /// <summary>
+        ///     The file extension of the primary output file for the build. It includes the '.' before the file extension.
+        /// </summary>
+        TargetExtension,
+
+        /// <summary>
         ///     Target framework is the particular version of the .NET Framework that your project is built to run on.
         /// </summary>
         TargetFrameworkVersion,
