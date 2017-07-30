@@ -22,10 +22,11 @@ namespace PS.Build.Extensions
         {
             T result = default(T);
             object vaultData;
-            if (vault.Query(typeof(T).FullName + vaultKey, out vaultData)) return result;
+            var key = typeof(T).FullName + vaultKey;
+            if (vault.Query(key, out vaultData)) return result;
 
             if (createFactory != null) result = createFactory();
-            vault.Store(vaultKey, result);
+            vault.Store(key, result);
 
             return result;
         }
@@ -38,7 +39,12 @@ namespace PS.Build.Extensions
 
         public static T Store<T>(this IDynamicVault vault, T value)
         {
-            return (T)vault.Store(typeof(T), value);
+            return vault.Store<T>(null, value);
+        }
+
+        public static T Store<T>(this IDynamicVault vault, string vaultKey, T value)
+        {
+            return (T)vault.Store(typeof(T).FullName + vaultKey, value);
         }
 
         #endregion
