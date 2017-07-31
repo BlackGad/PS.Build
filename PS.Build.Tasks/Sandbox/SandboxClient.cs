@@ -239,7 +239,7 @@ namespace PS.Build.Tasks
 
         private void ExecutePostBuildAdaptations(ILogger logger, List<AdaptationUsage> usages)
         {
-            if (usages.All(u => u.PreBuildMethod == null))
+            if (usages.All(u => u.PostBuildMethod == null))
             {
                 logger.Info("There is no discovered adaptations with post build instructions");
                 return;
