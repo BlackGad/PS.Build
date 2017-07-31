@@ -6,14 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("PS.Build.Tasks")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PS.Build.Tasks")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("PS.Build Engine")]
+[assembly: AssemblyDescription("PS.Build adaptation toolchain engine")]
+[assembly: AssemblyCompany("Vladimir Shkolka")]
+[assembly: AssemblyCopyright("Copyright © Vladimir Shkolka, 2017")]
+[assembly: AssemblyCulture("en")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
