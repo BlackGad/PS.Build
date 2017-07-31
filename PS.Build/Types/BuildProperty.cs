@@ -28,6 +28,27 @@ namespace PS.Build.Types
         ///     The root namespace to use when you name an embedded resource. This namespace is part of the embedded resource
         ///     manifest name.
         /// </summary>
-        RootNamespace
+        RootNamespace,
+
+        /// <summary>
+        ///     The absolute path name of the primary output file for the build (defined as drive + path + base name + file
+        ///     extension).
+        /// </summary>
+        TargetPath,
+
+        /// <summary>
+        ///     The base name of the primary output file for the build.
+        /// </summary>
+        TargetName,
+
+        /// <summary>
+        ///     The file extension of the primary output file for the build. It includes the '.' before the file extension.
+        /// </summary>
+        TargetExtension,
+
+        /// <summary>
+        ///     Target framework is the particular version of the .NET Framework that your project is built to run on.
+        /// </summary>
+        TargetFrameworkVersion,
     }
 }

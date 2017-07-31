@@ -155,6 +155,18 @@ namespace PS.Build.Tasks
         public string PropertyRootNamespace { get; set; }
 
         [Required]
+        public string PropertyTargetExtension { get; set; }
+
+        [Required]
+        public string PropertyTargetFrameworkVersion { get; set; }
+
+        [Required]
+        public string PropertyTargetName { get; set; }
+
+        [Required]
+        public string PropertyTargetPath { get; set; }
+
+        [Required]
         public ITaskItem[] References { get; set; }
 
         #endregion

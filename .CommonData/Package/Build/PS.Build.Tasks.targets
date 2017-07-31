@@ -34,9 +34,13 @@
 			References="@(ReferencePath)" 
 
 			PropertyProjectFile="$(MSBuildProjectFile)"			
+			PropertyTargetPath="$(TargetPath)"
+			PropertyTargetName="$(TargetName)"
+      PropertyTargetExtension="$(TargetExt)"
 			PropertyPlatform="$(Platform)"
 			PropertyConfiguration="$(Configuration)"
 			PropertyRootNamespace="$(RootNamespace)"
+			PropertyTargetFrameworkVersion="$(TargetFrameworkVersion)"
 
 			DirectoryIntermediate="$(IntermediateOutputPath)"
 			DirectoryProject="$(MSBuildProjectDirectory)"
