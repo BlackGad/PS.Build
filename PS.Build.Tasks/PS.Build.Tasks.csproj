@@ -135,7 +135,9 @@
     <Compile Include="Sandbox\AdaptationUsage.cs" />
     <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
     <Compile Include="Sandbox\DomainAssemblyResolver.cs" />
+    <Compile Include="Services\Logger\DelegateDisposable.cs" />
     <Compile Include="Services\DynamicVault.cs" />
+    <Compile Include="Services\Logger\ScopeLogger.cs" />
     <Compile Include="Services\MacroResolver\EnvironmentMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\ExplorerMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\MacroResolver.cs" />
@@ -155,7 +157,7 @@
     <Compile Include="Services\Explorer\Explorer.cs" />
     <Compile Include="Sandbox\SandboxClient.cs" />
     <Compile Include="Sandbox\Sanbox.cs" />
-    <Compile Include="Services\Logger.cs" />
+    <Compile Include="Services\Logger\Logger.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />

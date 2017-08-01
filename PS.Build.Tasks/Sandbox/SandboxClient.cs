@@ -279,7 +279,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
-                    serviceProvider.AddService(typeof(ILogger), logger);
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
                     serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
@@ -338,7 +338,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
-                    serviceProvider.AddService(typeof(ILogger), logger);
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(IArtifactory), artifactory);
                     serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
