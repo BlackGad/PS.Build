@@ -8,14 +8,29 @@ namespace PS.Build.Tasks.Services
     class Logger : MarshalByRefObject,
                    ILogger
     {
+        #region Constants
+
+        private const string IndentHolder = "  ";
+
+        #endregion
+
         private readonly TaskLoggingHelper _log;
+
+        string _indent;
 
         #region Constructors
 
         public Logger(TaskLoggingHelper log)
         {
             _log = log;
+            _indent = string.Empty;
         }
+
+        #endregion
+
+        #region Properties
+
+        public bool HasErrors => _log.HasLoggedErrors;
 
         #endregion
 
@@ -36,6 +51,12 @@ namespace PS.Build.Tasks.Services
             _log.LogError(message ?? string.Empty);
         }
 
+        public IDisposable IndentMessages()
+        {
+            _indent += IndentHolder;
+            return new DelegateDisposable(() => { _indent = _indent.Substring(0, Math.Max(_indent.Length - IndentHolder.Length, 0)); });
+        }
+
         public void Info(string message)
         {
             _log.LogMessage(MessageImportance.Normal, message ?? string.Empty);
@@ -44,6 +65,34 @@ namespace PS.Build.Tasks.Services
         public void Warn(string message)
         {
             _log.LogWarning(message ?? string.Empty);
+        }
+
+        #endregion
+
+        #region Nested type: DelegateDisposable
+
+        class DelegateDisposable : IDisposable
+        {
+            private readonly Action _action;
+
+            #region Constructors
+
+            public DelegateDisposable(Action action)
+            {
+                if (action == null) throw new ArgumentNullException(nameof(action));
+                _action = action;
+            }
+
+            #endregion
+
+            #region IDisposable Members
+
+            public void Dispose()
+            {
+                _action();
+            }
+
+            #endregion
         }
 
         #endregion
