@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Essential adaptations implementation for PS.Build adaptation toolchain")]
 [assembly: AssemblyCompany("Vladimir Shkolka")]
 [assembly: AssemblyCopyright("Copyright © Vladimir Shkolka, 2017")]
-[assembly: AssemblyCulture("en")]
+[assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
