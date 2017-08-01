@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using PS.Build.Extensions;
 using PS.Build.Services;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Tasks.Services;
@@ -249,7 +250,8 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Debug($"Adaptation: {usage.AttributeData}");
+                logger.Info("------------");
+                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PostBuildMethod;
                 if (method == null)
                 {
@@ -278,7 +280,7 @@ namespace PS.Build.Tasks
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
-                    serviceProvider.AddService(typeof(ILogger), logger);
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
                     serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
@@ -308,7 +310,8 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Debug($"Adaptation: {usage.AttributeData}");
+                logger.Info("------------");
+                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PreBuildMethod;
                 if (method == null)
                 {
@@ -331,13 +334,12 @@ namespace PS.Build.Tasks
                 try
                 {
                     var artifactory = new Artifactory();
-
                     var serviceProvider = new ServiceProvider();
                     serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
                     serviceProvider.AddService(typeof(SyntaxTree), usage.SyntaxTree);
                     serviceProvider.AddService(typeof(SemanticModel), usage.SemanticModel);
-                    serviceProvider.AddService(typeof(ILogger), logger);
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
                     serviceProvider.AddService(typeof(IExplorer), _explorer);
                     serviceProvider.AddService(typeof(IArtifactory), artifactory);
                     serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using PS.Build.Extensions;
 using PS.Build.Services;
-using PS.Build.Tasks.Extensions;
 
 namespace PS.Build.Tasks
 {

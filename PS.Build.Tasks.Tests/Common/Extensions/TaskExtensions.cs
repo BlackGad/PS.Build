@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NUnit.Framework;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 
 namespace PS.Build.Tasks.Tests.Common.Extensions
 {

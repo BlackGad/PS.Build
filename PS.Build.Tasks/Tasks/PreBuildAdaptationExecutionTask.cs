@@ -9,6 +9,7 @@ using Microsoft.Build.Utilities;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Tasks.Services;
 using PS.Build.Types;
+using PS.Build.Extensions;
 using Logger = PS.Build.Tasks.Services.Logger;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local

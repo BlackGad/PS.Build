@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 
 namespace PS.Build.Tasks.Services
 {

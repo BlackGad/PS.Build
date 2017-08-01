@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 
 namespace PS.Build.Tasks.Tests.Common.Extensions
 {
