@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 
 namespace PS.Build.Tasks.Tests.Common
 {
@@ -101,14 +101,8 @@ namespace PS.Build.Tasks.Tests.Common
                 },
             };
 
-            process.OutputDataReceived += (sender, args) =>
-            {
-                if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data);
-            };
-            process.ErrorDataReceived += (sender, args) =>
-            {
-                if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data);
-            };
+            process.OutputDataReceived += (sender, args) => { if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data); };
+            process.ErrorDataReceived += (sender, args) => { if (!string.IsNullOrEmpty(args.Data)) Console.WriteLine(args.Data); };
             process.Start();
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();

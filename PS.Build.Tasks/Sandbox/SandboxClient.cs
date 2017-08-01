@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using PS.Build.Extensions;
 using PS.Build.Services;
 using PS.Build.Tasks.Extensions;
 using PS.Build.Tasks.Services;

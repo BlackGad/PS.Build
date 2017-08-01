@@ -131,7 +131,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\EnumExtensions.cs" />
-    <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Sandbox\AdaptationUsage.cs" />
     <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
@@ -144,10 +143,8 @@
     <Compile Include="Services\MacroResolver\SpecialDirectoryMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\TimeMacroHandler.cs" />
     <Compile Include="Services\MacroResolver\UidMacroHandler.cs" />
-    <Compile Include="Services\NugetExplorer\NugetPackage.cs" />
     <Compile Include="Services\ServiceProvider.cs" />
     <Compile Include="Services\Artifactory\ArtifactCache.cs" />
-    <Compile Include="Services\NugetExplorer\NugetExplorer.cs" />
     <Compile Include="Sandbox\SuspiciousAttributeSyntaxes.cs" />
     <Compile Include="Sandbox\CacheManager.cs" />
     <Compile Include="Services\Artifactory\Artifact.cs" />
@@ -159,7 +156,6 @@
     <Compile Include="Sandbox\SandboxClient.cs" />
     <Compile Include="Sandbox\Sanbox.cs" />
     <Compile Include="Services\Logger.cs" />
-    <Compile Include="Extensions\IOExtensions.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />

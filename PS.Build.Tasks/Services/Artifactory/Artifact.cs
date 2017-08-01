@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 using PS.Build.Types;
 
 namespace PS.Build.Tasks.Services

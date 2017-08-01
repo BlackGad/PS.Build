@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PS.Build.Extensions;
 
 namespace PS.Build.Tasks.Extensions
 {
