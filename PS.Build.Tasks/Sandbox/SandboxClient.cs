@@ -250,7 +250,8 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Debug($"Adaptation: {usage.AttributeData}");
+                logger.Info("------------");
+                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PostBuildMethod;
                 if (method == null)
                 {
@@ -309,7 +310,8 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Debug($"Adaptation: {usage.AttributeData}");
+                logger.Info("------------");
+                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PreBuildMethod;
                 if (method == null)
                 {
@@ -332,7 +334,6 @@ namespace PS.Build.Tasks
                 try
                 {
                     var artifactory = new Artifactory();
-
                     var serviceProvider = new ServiceProvider();
                     serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
