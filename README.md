@@ -1,7 +1,7 @@
 # PS.Build: Toolchain to control msbuild process via C# code
 [![NuGet Version](https://img.shields.io/nuget/v/PS.Build.svg?label=master+nuget)](https://www.nuget.org/packages?q=PS.Build)
 [![Build status](https://ci.appveyor.com/api/projects/status/ki1xn6w347k0vord?svg=true)](https://ci.appveyor.com/project/BlackGad/ps-build)
-[![MyGet CI](https://img.shields.io/myget/ps-projects/vpre/PS.Build.svg?label=CI+nuget)](https://www.myget.org/gallery/ps-projects)
+[![MyGet CI](https://img.shields.io/myget/ps-projects/vpre/ps.build.svg?label=CI+nuget)](https://www.myget.org/gallery/ps-projects)
 [![Build status](https://ci.appveyor.com/api/projects/status/ixmnwi3hxi4jot9b?svg=true)](https://ci.appveyor.com/project/BlackGad/ps-build-xhs18)
 
 Build process with [MSBuild](https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx) engine is powerful and simple. Current toolchain allows developer to extend and adapt his project build process using inline C# code via [Attributes](https://msdn.microsoft.com/en-us/library/aa288454(v=vs.71).aspx).
