@@ -6,6 +6,9 @@
 
 Build process with [MSBuild](https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx) engine is powerful and simple. Current toolchain allows developer to extend and adapt his project build process using inline C# code via [Attributes](https://msdn.microsoft.com/en-us/library/aa288454(v=vs.71).aspx).
 
+## Known adaptations
+* [NuGet](https://github.com/BlackGad/PS.Build.Nuget) - NuGet stuff via attributes 
+
 ## Usage
 Build process extending have 2 logical parts 
 *	Attribute definition
@@ -89,6 +92,3 @@ When you add additional **COMPILE** items on [PreBuild](https://github.com/Black
 
 ## Documentation
 Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
-
-## Known adaptations
-* [NuGet](https://github.com/BlackGad/PS.Build.Nuget) - NuGet stuff via attributes 
