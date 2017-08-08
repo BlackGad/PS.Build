@@ -90,3 +90,5 @@ When you add additional **COMPILE** items on [PreBuild](https://github.com/Black
 ## Documentation
 Additional information could be found at project [wiki page](https://github.com/BlackGad/PS.Build/wiki)
 
+## Known adaptations
+* [NuGet](https://github.com/BlackGad/PS.Build.Nuget) - NuGet stuff via attributes 
