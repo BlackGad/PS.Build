@@ -41,7 +41,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\Files\FsCopyAttribute.cs" />
+    <Compile Include="Attributes\Files\FgBaseActionAttribute.cs" />
+    <Compile Include="Attributes\Files\FsMoveAttribute.cs" />
+    <Compile Include="Attributes\Files\FsRemoveAttribute.cs" />
+    <Compile Include="Attributes\Files\Usage.cs" />
+    <Compile Include="Attributes\Files\FileGroups.cs" />
+    <Compile Include="Attributes\Files\FgActionCopyAttribute.cs" />
+    <Compile Include="Attributes\Files\FgActionMoveAttribute.cs" />
+    <Compile Include="Attributes\Files\FgActionPackAttribute.cs" />
+    <Compile Include="Attributes\Files\FgActionRemoveAttribute.cs" />
+    <Compile Include="Attributes\Files\FgBaseAttribute.cs" />
+    <Compile Include="Attributes\Files\FgFilterAttribute.cs" />
+    <Compile Include="Attributes\Files\FgForkAttribute.cs" />
+    <Compile Include="Attributes\Files\FgSelectAttribute.cs" />
     <Compile Include="Attributes\ExecuteProcessAttribute.cs" />
+    <Compile Include="Attributes\Files\FgSelectFromArchiveAttribute.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
