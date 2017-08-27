@@ -2,7 +2,7 @@
 
 namespace PS.Build.Essentials.Attributes
 {
-    public abstract class FgBaseAttribute : Attribute
+    public abstract class GroupBaseAttribute : Attribute
     {
         #region Properties
 

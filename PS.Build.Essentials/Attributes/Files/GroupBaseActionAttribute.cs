@@ -1,6 +1,6 @@
 namespace PS.Build.Essentials.Attributes
 {
-    public abstract class FgBaseActionAttribute : FgBaseAttribute
+    public abstract class GroupBaseActionAttribute : GroupBaseAttribute
     {
         #region Properties
 

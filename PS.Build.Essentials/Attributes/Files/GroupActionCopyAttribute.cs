@@ -5,11 +5,11 @@ namespace PS.Build.Essentials.Attributes
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public class FgSelectFromArchiveAttribute : FgBaseAttribute
+    public class GroupActionCopyAttribute : GroupBaseActionAttribute
     {
         #region Constructors
 
-        public FgSelectFromArchiveAttribute(string archivePath, string pattern)
+        public GroupActionCopyAttribute(string targetFolder)
         {
         }
 

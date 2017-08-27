@@ -5,11 +5,11 @@ namespace PS.Build.Essentials.Attributes
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public class FsRemoveAttribute : Attribute
+    public class GroupActionPackAttribute : GroupBaseActionAttribute
     {
         #region Constructors
 
-        public FsRemoveAttribute(string sourcePattern, string filterPattern = null)
+        public GroupActionPackAttribute(string archivePath, string relativePath = null)
         {
         }
 

@@ -5,11 +5,11 @@ namespace PS.Build.Essentials.Attributes
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public class FgActionMoveAttribute : FgBaseActionAttribute
+    public class RemoveAttribute : Attribute
     {
         #region Constructors
 
-        public FgActionMoveAttribute(string targetFolder)
+        public RemoveAttribute(string sourcePattern, string filterPattern = null)
         {
         }
 

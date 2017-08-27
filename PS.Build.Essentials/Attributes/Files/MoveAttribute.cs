@@ -5,11 +5,11 @@ namespace PS.Build.Essentials.Attributes
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public class FsMoveAttribute : Attribute
+    public class MoveAttribute : Attribute
     {
         #region Constructors
 
-        public FsMoveAttribute(string sourcePattern, string targetFolder, string filterPattern = null)
+        public MoveAttribute(string sourcePattern, string targetFolder, string filterPattern = null)
         {
         }
 

@@ -4,24 +4,24 @@
 //https://github.com/adamhathcock/sharpcompress
 //https://github.com/monemihir/LZMA-SDK
 
-[assembly: FgSelect(@"{dir.target}\**\*.*")]
-[assembly: FgFilter(@"*.pdb")]
+[assembly: GroupImport(@"{dir.target}\**\*.*")]
+[assembly: GroupFilter(@"*.pdb")]
 //
 
-[assembly: FgActionCopy(@"{dir.target}\Hello", SelectPattern = @"**\*.*")]
-[assembly: FgActionRemove(SelectPattern = @"**\*.*")]
+[assembly: GroupActionCopy(@"{dir.target}\Hello", SelectPattern = @"**\*.*")]
+[assembly: GroupActionRemove(SelectPattern = @"**\*.*")]
 //
 
-[assembly: FgFork(@"*", FileGroups.Default, Group = FileGroups.Alpha)]
+[assembly: GroupFork(@"*", Groups.Default, Group = Groups.Alpha)]
 //
 
-[assembly: FgActionPack(@"{dir.target}\backup.zip", "hello", Group = FileGroups.Alpha)]
-[assembly: FgActionMove(@"{dir.target}\Forked", Group = FileGroups.Alpha)]
+[assembly: GroupActionPack(@"{dir.target}\backup.zip", "hello", Group = Groups.Alpha)]
+[assembly: GroupActionMove(@"{dir.target}\Forked", Group = Groups.Alpha)]
 //
 
-[assembly: FgSelectFromArchive(@"{dir.target}\archive.zip", @".\**\*.*", Group = FileGroups.Beta)]
-[assembly: FgFilter(@"*.pdb", Group = FileGroups.Beta)]
-[assembly: FgActionMove(@"{dir.target}\archive.zip", Group = FileGroups.Beta)]
+[assembly: GroupImport(@"{dir.target}\archive.zip!**\*.*", Group = Groups.Beta)]
+[assembly: GroupFilter(@"*.pdb", Group = Groups.Beta)]
+[assembly: GroupActionMove(@"{dir.target}\archive.zip", Group = Groups.Beta)]
 //
 
-[assembly: FsCopy(@"{dir.target}\archive.zip!hello\**\*.*", @"{dir.target}\archive2.zip!")]
+[assembly: Copy(@"{dir.target}\archive.zip!hello\**\*.*", @"{dir.target}\archive2.zip!")]

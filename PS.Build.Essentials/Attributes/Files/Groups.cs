@@ -1,6 +1,6 @@
 namespace PS.Build.Essentials.Attributes
 {
-    public static class FileGroups
+    public static class Groups
     {
         #region Constants
 

@@ -5,11 +5,11 @@ namespace PS.Build.Essentials.Attributes
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     [Designer("PS.Build.Adaptation")]
-    public class FgActionCopyAttribute : FgBaseActionAttribute
+    public class GroupActionMoveAttribute : GroupBaseActionAttribute
     {
         #region Constructors
 
-        public FgActionCopyAttribute(string targetFolder)
+        public GroupActionMoveAttribute(string targetFolder)
         {
         }
 
