@@ -15,6 +15,7 @@ Build process extending have 2 logical parts
 *	Adaptation applying
 
 [Attribute definition](https://github.com/BlackGad/PS.Build/wiki/Adaptation-attribute) looks like generic C# attribute definition with additional ```DesignerAttribute("PS.Build.Adaptation")``` attribute and several implemented methods with specific signature. Available methods:
+* [Setup](https://github.com/BlackGad/PS.Build/wiki/Setup-method) - called before any other methods. Here you can setup adaptation specific logic.
 * [PreBuild](https://github.com/BlackGad/PS.Build/wiki/PreBuild-method) - called before build. Here you can analyze MSBuild environment before build. Also gives the opportunity to add additional generated MSBuild items.
 * [PostBuild](https://github.com/BlackGad/PS.Build/wiki/PostBuild-method) – called after build. Here you can setup deploy, clean etc tasks.
 
