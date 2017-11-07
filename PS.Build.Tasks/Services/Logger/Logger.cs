@@ -43,7 +43,12 @@ namespace PS.Build.Tasks.Services
 
         public void Debug(string message)
         {
+#if DEBUG
+            _log.LogMessage(MessageImportance.Low, _indent + "^ " + message);
+#else
             _log.LogMessage(MessageImportance.Low, _indent + message);
+#endif
+
         }
 
         public void Error(string message)

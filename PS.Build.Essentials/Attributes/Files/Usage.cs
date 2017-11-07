@@ -15,7 +15,7 @@
 [assembly: GroupFork(@"*", Groups.Default, Group = Groups.Alpha)]
 //
 
-[assembly: GroupActionPack(@"{dir.target}\backup.zip", "hello", Group = Groups.Alpha)]
+[assembly: GroupActionPack(@"{dir.target}\backup.zip!hello", Group = Groups.Alpha)]
 [assembly: GroupActionMove(@"{dir.target}\Forked", Group = Groups.Alpha)]
 //
 

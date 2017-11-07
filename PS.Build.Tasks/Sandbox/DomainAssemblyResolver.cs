@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using PS.Build.Services;
 
 namespace PS.Build.Tasks
 {
@@ -25,14 +26,16 @@ namespace PS.Build.Tasks
 
         private readonly string[] _assemblyReferences;
         private readonly string[] _bannedDirectories;
+        private readonly ILogger _logger;
 
         #region Constructors
 
-        public DomainAssemblyResolver(string[] additionalDirectories, string[] assemblyReferences)
+        public DomainAssemblyResolver(string[] additionalDirectories, string[] assemblyReferences, ILogger logger)
         {
             if (additionalDirectories == null) throw new ArgumentNullException(nameof(additionalDirectories));
             if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
             _assemblyReferences = assemblyReferences;
+            _logger = logger;
             _additionalDirectories = additionalDirectories;
             _bannedDirectories = new[]
             {
@@ -61,6 +64,7 @@ namespace PS.Build.Tasks
             var resolved = _assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
                                                                                  queryAssemblyName,
                                                                                  StringComparison.InvariantCultureIgnoreCase));
+
             foreach (var directory in _additionalDirectories)
             {
                 if (resolved != null) break;
@@ -74,6 +78,8 @@ namespace PS.Build.Tasks
                 var directory = Path.GetDirectoryName(reference);
                 resolved = FindAtLocation(queryAssemblyName, directory);
             }
+
+            _logger.Info($"# Assembly {queryAssemblyName} resolved with {resolved}");
 
             return string.IsNullOrWhiteSpace(resolved)
                 ? null

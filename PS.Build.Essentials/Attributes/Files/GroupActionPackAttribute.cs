@@ -9,7 +9,7 @@ namespace PS.Build.Essentials.Attributes
     {
         #region Constructors
 
-        public GroupActionPackAttribute(string archivePath, string relativePath = null)
+        public GroupActionPackAttribute(string archivePath)
         {
         }
 

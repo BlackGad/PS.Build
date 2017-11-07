@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -123,6 +124,32 @@ namespace PS.Build.Tasks
             {
                 logger.Info("Assembly does not use any defined adaptation attribute.");
                 return result.ToArray();
+            }
+
+            var setupMethods = new List<MethodInfo>();
+            foreach (var usage in Sort(_usages))
+            {
+                setupMethods.AddRange(usage.SetupMethods);
+            }
+            
+            setupMethods = setupMethods.Distinct().ToList();
+
+            if (setupMethods.Any())
+            {
+                logger.Info("Setup adaptations");
+                foreach (var method in setupMethods)
+                {
+                    logger.Info("------------");
+                    logger.Info($"Setup: {method.DeclaringType?.Name} type");
+
+                    var serviceProvider = new ServiceProvider();
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
+                    serviceProvider.AddService(typeof(IExplorer), _explorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
+                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
+                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
+                    method.Invoke(null, new object[] { serviceProvider });
+                }
             }
 
             var artifacts = new List<Artifact>();
@@ -432,7 +459,8 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {e.GetBaseException()}");
+
+                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {((System.Reflection.ReflectionTypeLoadException)e.GetBaseException()).LoaderExceptions.First()}");
                 }
             }
 

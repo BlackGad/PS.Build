@@ -9,11 +9,13 @@ namespace PS.Build.Tasks
     class Sanbox : IDisposable
     {
         private readonly AppDomain _appDomain;
+        private readonly ILogger _logger;
 
         #region Constructors
 
-        public Sanbox(IExplorer explorer)
+        public Sanbox(IExplorer explorer, ILogger logger)
         {
+            _logger = logger;
             var executingAssembly = Assembly.GetExecutingAssembly();
             var additionalReferenceDirectories = new[]
             {
@@ -27,7 +29,9 @@ namespace PS.Build.Tasks
                 //Unit tests
                 configurationFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.config");
             }
-            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories, Enumerable.Empty<string>().ToArray());
+            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories,
+                                                              Enumerable.Empty<string>().ToArray(),
+                                                              _logger);
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
@@ -38,7 +42,8 @@ namespace PS.Build.Tasks
             {
                 _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
                 SandboxAssemblyResolver = Create<DomainAssemblyResolver>(additionalReferenceDirectories,
-                                                                         explorer.References.Select(r => r.FullPath).ToArray());
+                                                                         explorer.References.Select(r => r.FullPath).ToArray(),
+                                                                         _logger);
                 Client = Create<SandboxClient>(explorer);
             }
             catch
