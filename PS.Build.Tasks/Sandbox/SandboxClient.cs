@@ -492,7 +492,7 @@ namespace PS.Build.Tasks
                                                              AdaptationUsage.GetPostBuildMethod(t) == null &&
                                                              !AdaptationUsage.GetSetupMethods(t).Any())
                                                  .ToList();
-            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no Setuo, PreBuid or PostBuild entries. Skipping..."));
+            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no Setup, PreBuid or PostBuild entries. Skipping..."));
             adaptationTypes = adaptationTypes.Except(emptyAttributes).ToList();
 
             logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");

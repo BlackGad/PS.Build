@@ -50,7 +50,7 @@ namespace PS.Build.Tasks.Tests.Tasks
                     if (value == AttributeTargets.All) continue;
 
                     errors.AddRange(preWarnings.AssertContains(1,
-                                                               $"DefinitionLibrary.{value}.EmptyAttribute has no PreBuid or PostBuild entries. Skipping..."));
+                                                               $"DefinitionLibrary.{value}.EmptyAttribute has no Setup, PreBuid or PostBuild entries. Skipping..."));
 
                     var expectedCount = 1;
                     if (value == AttributeTargets.Field) expectedCount = 2;
@@ -102,7 +102,7 @@ namespace PS.Build.Tasks.Tests.Tasks
                     if (value == AttributeTargets.All) continue;
 
                     errors.AddRange(preWarnings.AssertContains(1,
-                                                               $"DefinitionLibrary.{value}.EmptyAttribute has no PreBuid or PostBuild entries. Skipping..."));
+                                                               $"DefinitionLibrary.{value}.EmptyAttribute has no Setup, PreBuid or PostBuild entries. Skipping..."));
 
                     errors.AddRange(preMessages.AssertContains(1, string.Join(",", "PreBuild", value, "PreBuildAttribute")));
                     errors.AddRange(postMessages.AssertContains(1, string.Join(",", "PostBuild", value, "PostBuildAttribute")));
