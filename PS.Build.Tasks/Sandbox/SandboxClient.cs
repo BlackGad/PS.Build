@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -131,14 +132,16 @@ namespace PS.Build.Tasks
             {
                 setupMethods.AddRange(usage.SetupMethods);
             }
-            
-            setupMethods = setupMethods.Distinct().ToList();
 
             if (setupMethods.Any())
             {
                 logger.Info("Setup adaptations");
+                var calledMethods = new List<MethodInfo>();
                 foreach (var method in setupMethods)
                 {
+                    if(calledMethods.Contains(method)) continue;
+                    calledMethods.Add(method);
+
                     logger.Info("------------");
                     logger.Info($"Setup: {method.DeclaringType?.Name} type");
 
@@ -486,9 +489,10 @@ namespace PS.Build.Tasks
 
             //Check attributes with out key methods
             var emptyAttributes = adaptationTypes.Where(t => AdaptationUsage.GetPreBuildMethod(t) == null &&
-                                                             AdaptationUsage.GetPostBuildMethod(t) == null)
+                                                             AdaptationUsage.GetPostBuildMethod(t) == null &&
+                                                             !AdaptationUsage.GetSetupMethods(t).Any())
                                                  .ToList();
-            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no PreBuid or PostBuild entries. Skipping..."));
+            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no Setuo, PreBuid or PostBuild entries. Skipping..."));
             adaptationTypes = adaptationTypes.Except(emptyAttributes).ToList();
 
             logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");

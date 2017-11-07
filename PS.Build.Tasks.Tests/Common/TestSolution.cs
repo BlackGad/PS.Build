@@ -84,7 +84,6 @@ namespace PS.Build.Tasks.Tests.Common
             {
                 "restore",
                 $"\"{SolutionPath}\"",
-                //$"-SolutionDirectory \"{SolutionDirectory}\"",
                 "-NonInteractive"
             };
 

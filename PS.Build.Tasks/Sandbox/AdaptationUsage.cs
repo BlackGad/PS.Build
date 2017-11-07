@@ -58,6 +58,7 @@ namespace PS.Build.Tasks
 
                 baseType = baseType.BaseType;
             }
+            result.Reverse();
             return result.ToArray();
         }
 

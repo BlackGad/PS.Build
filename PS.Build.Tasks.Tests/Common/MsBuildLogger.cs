@@ -1,18 +1,41 @@
 ﻿using System;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace PS.Build.Tasks.Tests.Common
 {
-    public class MsBuildLogger : Logger
+    public class MsBuildLogger : ILogger
     {
         StringBuilder _builder;
         private int _indent;
 
-        #region Override members
+        #region Properties
 
-        public override void Initialize(IEventSource eventSource)
+        /// <summary>
+        ///     This property holds the user-specified parameters to the logger. If parameters are not provided, a logger should
+        ///     revert
+        ///     to defaults. If a logger does not take parameters, it can ignore this property.
+        /// </summary>
+        /// <value>
+        ///     The parameter string (can be null).
+        /// </value>
+        public string Parameters { get; set; }
+
+        /// <summary>
+        ///     The verbosity level directs the amount of detail that appears in a logger's event log. Though this is only a
+        ///     recommendation based on user preferences, and a logger is free to choose the exact events it logs, it is still
+        ///     important that the guidelines for each level be followed, for a good user experience.
+        /// </summary>
+        /// <value>
+        ///     The verbosity level.
+        /// </value>
+        public LoggerVerbosity Verbosity { get; set; }
+
+        #endregion
+
+        #region ILogger Members
+
+        public void Initialize(IEventSource eventSource)
         {
             if (eventSource == null) throw new ArgumentNullException(nameof(eventSource));
 
@@ -23,6 +46,15 @@ namespace PS.Build.Tasks.Tests.Common
             eventSource.ErrorRaised += eventSource_ErrorRaised;
             eventSource.ProjectFinished += eventSource_ProjectFinished;
             _builder = new StringBuilder();
+        }
+
+        /// <summary>
+        ///     Called by the build engine to allow loggers to release any resources they may have allocated at initialization
+        ///     time,
+        ///     or during the build.
+        /// </summary>
+        public void Shutdown()
+        {
         }
 
         #endregion
@@ -40,10 +72,9 @@ namespace PS.Build.Tasks.Tests.Common
         {
             // BuildMessageEventArgs adds Importance to BuildEventArgs
             // Let's take account of the verbosity setting we've been passed in deciding whether to log the message
-            if ((e.Importance == MessageImportance.High && IsVerbosityAtLeast(LoggerVerbosity.Minimal))
-                || (e.Importance == MessageImportance.Normal && IsVerbosityAtLeast(LoggerVerbosity.Normal))
-                || (e.Importance == MessageImportance.Low && IsVerbosityAtLeast(LoggerVerbosity.Detailed))
-                )
+            if ((e.Importance == MessageImportance.High && Verbosity > LoggerVerbosity.Minimal)
+                || (e.Importance == MessageImportance.Normal && Verbosity > LoggerVerbosity.Normal)
+                || (e.Importance == MessageImportance.Low && Verbosity > LoggerVerbosity.Detailed))
             {
                 WriteLineWithSenderAndMessage(string.Empty, e);
             }
