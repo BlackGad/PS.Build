@@ -34,6 +34,12 @@ namespace Test
     [Designer("PS.Build.Adaptation")]
     public sealed class AdaptationAttribute : Attribute
     {
+        static void Setup(IServiceProvider provider)
+        {
+            var logger = provider.GetService<ILogger>();
+            logger.Info("Initialization");
+        }
+
         private readonly int _essentialQuestion;
 
         #region Constructors
