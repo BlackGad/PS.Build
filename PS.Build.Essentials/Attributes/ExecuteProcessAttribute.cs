@@ -111,7 +111,7 @@ namespace PS.Build.Essentials.Attributes
             {
                 var startInfo = new ProcessStartInfo
                 {
-                    Arguments = Arguments,
+                    Arguments = macroResolver.Resolve(Arguments),
                     CreateNoWindow = CreateNoWindow,
                     Domain = Domain,
                     FileName = macroResolver.Resolve(Filename),

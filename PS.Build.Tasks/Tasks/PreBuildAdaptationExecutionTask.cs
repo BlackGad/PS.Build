@@ -213,7 +213,7 @@ namespace PS.Build.Tasks
                                             directories,
                                             properties);
 
-                var sandbox = new Sanbox(explorer);
+                var sandbox = new Sanbox(explorer, logger);
                 BuildEngine4.RegisterTaskObject(typeof(Sanbox), sandbox, RegisteredTaskObjectLifetime.Build, false);
                 var artifacts = sandbox.Client.ExecutePreBuildAdaptations(logger);
                 if (artifacts.Any())

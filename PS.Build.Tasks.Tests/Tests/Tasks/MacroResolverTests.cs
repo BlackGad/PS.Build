@@ -11,23 +11,23 @@ namespace PS.Build.Tasks.Tests.Tasks
     [TestFixture]
     public class MacroResolverTests
     {
-        private IEnumerable<string> CheckTaskEvents(TaskEvents taskEvents)
+        private IEnumerable<string> CheckTaskEvents(string solutionDirectory, TaskEvents taskEvents)
         {
             var errors = new List<string>();
             var preMessages = taskEvents.Messages
                                         .SkipWhile(m => !Equals(m.Message, "Adaptation: DefinitionLibrary.Assembly.AllAttribute"))
                                         .TakeWhile(m => !Equals(m.Message, "------------"))
                                         .ToList();
-            errors.AddRange(preMessages.AssertContains(1, @"Simple string"));
-            errors.AddRange(preMessages.AssertContains(1, @"AnyCPU"));
-            errors.AddRange(preMessages.AssertContains(1, @"UsageLibrary"));
-            errors.AddRange(preMessages.AssertContains(2, @"packages\Newtonsoft.Json.10.0.3"));
-            errors.AddRange(preMessages.AssertContains(3, @"Newtonsoft.Json"));
-            errors.AddRange(preMessages.AssertContains(1, @"10.0.3.0"));
-            errors.AddRange(preMessages.AssertContains(4, @"10.0"));
-            errors.AddRange(preMessages.AssertContains(1, "{env}"));
-            errors.AddRange(preMessages.AssertContains(1, "{nuget.Newtonsoft}"));
-            errors.AddRange(preMessages.AssertContains(2, Environment.GetFolderPath(Environment.SpecialFolder.Windows)));
+            errors.AddRange(preMessages.AssertContains(1, @"|Simple string|"));
+            errors.AddRange(preMessages.AssertContains(1, @"|AnyCPU|"));
+            errors.AddRange(preMessages.AssertContains(1, $@"|{solutionDirectory}UsageLibrary\|"));
+            errors.AddRange(preMessages.AssertContains(2, $@"|{solutionDirectory}packages\Newtonsoft.Json.10.0.3\|"));
+            errors.AddRange(preMessages.AssertContains(1, @"|Newtonsoft.Json|"));
+            errors.AddRange(preMessages.AssertContains(1, @"|10.0.3.0|"));
+            errors.AddRange(preMessages.AssertContains(1, @"|10.0|"));
+            errors.AddRange(preMessages.AssertContains(1, "|{env}|"));
+            errors.AddRange(preMessages.AssertContains(1, "|{nuget.Newtonsoft}|"));
+            errors.AddRange(preMessages.AssertContains(2, "|" + Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "|"));
 
             var preWarnings = taskEvents.Warnings;
             errors.AddRange(preWarnings.AssertContains(1, "{boo.Platform:2df}"));
@@ -67,8 +67,8 @@ namespace PS.Build.Tasks.Tests.Tasks
 
                 var postBuildTask = runner.Create<PostBuildAdaptationExecutionTask>();
                 postBuildTask.Execute();
-                errors.AddRange(CheckTaskEvents(runner.GetEvents(preBuildTask)));
-                errors.AddRange(CheckTaskEvents(runner.GetEvents(postBuildTask)));
+                errors.AddRange(CheckTaskEvents(solutionDirectory, runner.GetEvents(preBuildTask)));
+                errors.AddRange(CheckTaskEvents(solutionDirectory, runner.GetEvents(postBuildTask)));
             }
             if (errors.Any()) Assert.Fail(string.Join(Environment.NewLine, errors));
         }

@@ -1,0 +1,113 @@
+﻿/****************************** Disclaimer ******************************
+PS.Build NuGet adaptation
+
+Documentation references
+PS.Build toolchain: https://github.com/BlackGad/PS.Build
+Adaptation: https://github.com/BlackGad/PS.Build.Nuget
+Nuspec: https://docs.microsoft.com/en-us/nuget/schema/nuspec
+
+Macro references:
+Inherited from PS.Build: https://github.com/BlackGad/PS.Build/wiki/Macro-resolver-service
+Current adaptation specific: https://github.com/BlackGad/PS.Build.Nuget/wiki/Macro-resolver-service-extensions
+
+
+This file contains main NuGet adaptation instructions and their description.
+
+All adaptations has ID property which by default equals your TargetName value. 
+You can specify several nuget packages with unique ID in same project
+*************************************************************************/
+
+/****************************** Fast start ******************************
+using PS.Build.Nuget.Attributes;
+
+//PS.Build runtime isolation: https://github.com/BlackGad/PS.Build#preprocessor-directives-isolation.
+#if DEBUG
+
+// USE AssemblyDescriptionAttribute instead
+//[assembly: Nuget(Description = "Some description")]
+
+// USE AssemblyCompanyAttribute instead
+//[assembly: NugetAuthor("Author")]
+
+[assembly: NugetFilesFromTarget]
+[assembly: NugetPackageDependenciesFromConfiguration]
+[assembly: NugetPackageDependenciesFilter("NuGet.*")]
+[assembly: NugetPackageDependenciesFilter("PS.Build.*")]
+[assembly: NugetPackageDependenciesFilter("Newtonsoft.Json")]
+[assembly: NugetBuild]
+[assembly: NugetDebugSubstitution]
+
+#endif
+
+*************************************************************************/
+using PS.Build.Nuget.Attributes;
+
+//PS.Build runtime isolation: https://github.com/BlackGad/PS.Build#preprocessor-directives-isolation.
+#if DEBUG
+
+// Setup main options for nuget package:
+// -------------------------|-------------------------------------------
+// Option                   | Default value
+// -------------------------|-------------------------------------------
+// Copyright                | Mapped from AssemblyCopyright attribute.
+// Description              | Mapped from AssemblyDescription attribute.
+// DevelopmentDependency    | Not specified.
+// IconUrl                  | Not specified.
+// Language                 | Mapped from AssemblyCulture attribute.
+// LicenseUrl               | Not specified.
+// MinClientVersion         | Not specified.
+// ProjectUrl               | Not specified.
+// ReleaseNotes             | Not specified.
+// RequireLicenseAcceptance | False.
+// Serviceable              | Not specified.
+// Summary                  | Not specified.
+// Tags                     | Not specified.
+// Title                    | Mapped from AssemblyTitle attribute.
+// Version                  | Mapped from AssemblyVersion attribute.
+// -------------------------|-------------------------------------------
+// Highly recomend to use Assembly attribute where possible.
+[assembly: Nuget(Description = "Some description")]
+
+// Add NuGet package author (may specify ownership as well). By default value mapped from AssemblyCompany attribute.
+[assembly: NugetAuthor("Author name")]
+
+// Add NuGet package owner. By default value mapped from AssemblyCompany attribute.
+[assembly: NugetOwner("Owner name")]
+
+// Add framework reference. You can specify target frameworks as well. By default Any framework value used.
+[assembly: NugetFrameworkReference("System.ComponentModel.DataAnnotations", "net461")]
+
+// Add internal NuGet package assembly reference. You can specify target frameworks as well. By default Any framework value used.
+[assembly: NugetPackageAssemblyReference("{prop.targetName}{prop.targetExtension}", "net452")]
+
+// Add NuGet package dependency. You can specify target frameworks and version range as well. By default Any framework and any version used.
+[assembly: NugetPackageDependency("NuGet.Client", "[4.2.0, )", "net461")]
+
+// Automatically parse packages.config project references and add them to NuGet package dependencies.
+[assembly: NugetPackageDependenciesFromConfiguration]
+
+// Filter NuGet package dependencies before build. Useful in pair with NugetPackageDependenciesFromConfigurationAttribute usage. 
+// Wildcards * and ? are supported in mask.
+[assembly: NugetPackageDependenciesFilter("NuGet.*", "net452")]
+
+// Add files to NuGet package. You can use all macro in source and destination parameters. Wildcards *, ** and ? are supported.
+[assembly: NugetFiles("{dir.target}{prop.targetName}.config", @"lib\{nuget.framework}")]
+
+// Automatically add project target files to NuGet package. You can include pdb or xml files as well with appropriate option. 
+// Also you can specify target assembly as NuGet package internal assembly reference.
+[assembly: NugetFilesFromTarget]
+
+// Filter NuGet package files before build. You can exclude any files specified before.
+// You can use all macro in source and destination parameters. Wildcards *, ** and ? are supported.
+[assembly: NugetFilesFilter("*.exe", @"lib\{nuget.framework}")]
+
+// Instruction to build nuget package after build. You can specify target directory here. Default value is TargetDirectory for this project.
+[assembly: NugetBuild]
+
+// Instruction to substitute installed NuGet package files in solutions which have dependency from your NuGet package.
+// To setup victim solutions setup its location in configuration file (you can specify it location with configurationFilePath parameter. 
+// By default it is solution folder).
+// Also you can specify generateTemplateFile option that will automatically create/modify configuration file and place there placeholder for specified NuGet package ID.
+[assembly: NugetDebugSubstitution]
+
+#endif

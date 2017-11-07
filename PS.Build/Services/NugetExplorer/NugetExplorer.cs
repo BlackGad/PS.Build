@@ -31,7 +31,7 @@ namespace PS.Build.Services
 
         private static INugetPackage GetLattestNugetPackage(string packageId, string nugetDirectory)
         {
-            if (nugetDirectory == null) throw new ArgumentException("Illegal archive directory");
+            if (nugetDirectory == null) throw new ArgumentException("Illegal nuget directory");
 
             var regexMask = new Regex((packageId + ".*").Replace(".", "\\.").Replace("*", ".*"),
                                       RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);

@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -123,6 +125,34 @@ namespace PS.Build.Tasks
             {
                 logger.Info("Assembly does not use any defined adaptation attribute.");
                 return result.ToArray();
+            }
+
+            var setupMethods = new List<MethodInfo>();
+            foreach (var usage in Sort(_usages))
+            {
+                setupMethods.AddRange(usage.SetupMethods);
+            }
+
+            if (setupMethods.Any())
+            {
+                logger.Info("Setup adaptations");
+                var calledMethods = new List<MethodInfo>();
+                foreach (var method in setupMethods)
+                {
+                    if(calledMethods.Contains(method)) continue;
+                    calledMethods.Add(method);
+
+                    logger.Info("------------");
+                    logger.Info($"Setup: {method.DeclaringType?.Name} type");
+
+                    var serviceProvider = new ServiceProvider();
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
+                    serviceProvider.AddService(typeof(IExplorer), _explorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
+                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
+                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
+                    method.Invoke(null, new object[] { serviceProvider });
+                }
             }
 
             var artifacts = new List<Artifact>();
@@ -250,8 +280,6 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Info("------------");
-                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PostBuildMethod;
                 if (method == null)
                 {
@@ -275,6 +303,9 @@ namespace PS.Build.Tasks
 
                 try
                 {
+                    logger.Info("------------");
+                    logger.Info($"Adaptation: {usage.AttributeData}");
+
                     var serviceProvider = new ServiceProvider();
                     serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
                     serviceProvider.AddService(typeof(SyntaxNode), usage.AssociatedSyntaxNode);
@@ -310,8 +341,6 @@ namespace PS.Build.Tasks
 
             foreach (var usage in Sort(usages))
             {
-                logger.Info("------------");
-                logger.Info($"Adaptation: {usage.AttributeData}");
                 var method = usage.PreBuildMethod;
                 if (method == null)
                 {
@@ -333,6 +362,9 @@ namespace PS.Build.Tasks
 
                 try
                 {
+                    logger.Info("------------");
+                    logger.Info($"Adaptation: {usage.AttributeData}");
+
                     var artifactory = new Artifactory();
                     var serviceProvider = new ServiceProvider();
                     serviceProvider.AddService(typeof(CSharpCompilation), _compilation);
@@ -430,7 +462,8 @@ namespace PS.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {e.GetBaseException()}");
+
+                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {((System.Reflection.ReflectionTypeLoadException)e.GetBaseException()).LoaderExceptions.First()}");
                 }
             }
 
@@ -456,9 +489,10 @@ namespace PS.Build.Tasks
 
             //Check attributes with out key methods
             var emptyAttributes = adaptationTypes.Where(t => AdaptationUsage.GetPreBuildMethod(t) == null &&
-                                                             AdaptationUsage.GetPostBuildMethod(t) == null)
+                                                             AdaptationUsage.GetPostBuildMethod(t) == null &&
+                                                             !AdaptationUsage.GetSetupMethods(t).Any())
                                                  .ToList();
-            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no PreBuid or PostBuild entries. Skipping..."));
+            emptyAttributes.ForEach(type => logger.Warn($"{type.FullName} has no Setup, PreBuid or PostBuild entries. Skipping..."));
             adaptationTypes = adaptationTypes.Except(emptyAttributes).ToList();
 
             logger.Info($"Found {adaptationTypes.Count} adaptation attribute definitions");

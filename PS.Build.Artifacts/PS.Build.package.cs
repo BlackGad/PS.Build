@@ -15,5 +15,6 @@
 [assembly: NugetPackageAssemblyReference(@"PS.Build.dll", ID = "PS.Build")]
 
 [assembly: NugetBuild(@"{dir.solution}_Artifacts\{prop.configuration}.{prop.platform}", ID = "PS.Build")]
+[assembly: NugetDebugSubstitution(ID = "PS.Build")]
 
 #endif

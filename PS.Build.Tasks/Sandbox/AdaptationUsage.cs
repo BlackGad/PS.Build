@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
@@ -43,6 +45,23 @@ namespace PS.Build.Tasks
             return null;
         }
 
+        public static MethodInfo[] GetSetupMethods(Type t)
+        {
+            var result = new List<MethodInfo>();
+            var baseType = t;
+            while (baseType != null)
+            {
+                var method = baseType.GetMethod("Setup", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                var parameters = method?.GetParameters();
+                if (parameters?.Length == 1 && parameters.First().ParameterType == typeof(IServiceProvider))
+                    result.Add(method);
+
+                baseType = baseType.BaseType;
+            }
+            result.Reverse();
+            return result.ToArray();
+        }
+
         #endregion
 
         #region Constructors
@@ -59,9 +78,11 @@ namespace PS.Build.Tasks
             AssociatedSyntaxNode = associatedSyntaxNode;
             AttributeData = attributeData;
             Type = type;
+
             AttributeTargets = attributeTargets;
             PreBuildMethod = GetPreBuildMethod(type);
             PostBuildMethod = GetPostBuildMethod(type);
+            SetupMethods = GetSetupMethods(type);
         }
 
         #endregion
@@ -76,6 +97,7 @@ namespace PS.Build.Tasks
 
         public MethodInfo PreBuildMethod { get; }
         public SemanticModel SemanticModel { get; }
+        public MethodInfo[] SetupMethods { get; }
 
         public SyntaxTree SyntaxTree { get; }
         public Type Type { get; }
