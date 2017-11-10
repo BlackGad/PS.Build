@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using PS.Build.Services;
+using PS.Build.Types;
 
 namespace PS.Build.Tasks
 {
@@ -20,7 +21,8 @@ namespace PS.Build.Tasks
             var additionalReferenceDirectories = new[]
             {
                 Path.GetDirectoryName(executingAssembly.Location),
-                AppDomain.CurrentDomain.BaseDirectory
+                AppDomain.CurrentDomain.BaseDirectory,
+                explorer.Directories[BuildDirectory.Target]
             };
 
             var configurationFile = executingAssembly.Location + ".config";
@@ -29,9 +31,7 @@ namespace PS.Build.Tasks
                 //Unit tests
                 configurationFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.config");
             }
-            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories,
-                                                              Enumerable.Empty<string>().ToArray(),
-                                                              _logger);
+        
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
@@ -60,7 +60,6 @@ namespace PS.Build.Tasks
         public SandboxClient Client { get; }
 
         public DomainAssemblyResolver SandboxAssemblyResolver { get; }
-        public DomainAssemblyResolver TaskAssemblyResolver { get; }
 
         #endregion
 
@@ -68,7 +67,6 @@ namespace PS.Build.Tasks
 
         public void Dispose()
         {
-            TaskAssemblyResolver.Dispose();
             SandboxAssemblyResolver.Dispose();
             AppDomain.Unload(_appDomain);
         }

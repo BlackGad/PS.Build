@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -139,7 +137,7 @@ namespace PS.Build.Tasks
                 var calledMethods = new List<MethodInfo>();
                 foreach (var method in setupMethods)
                 {
-                    if(calledMethods.Contains(method)) continue;
+                    if (calledMethods.Contains(method)) continue;
                     calledMethods.Add(method);
 
                     logger.Info("------------");
@@ -453,17 +451,18 @@ namespace PS.Build.Tasks
                 try
                 {
                     var assembly = Assembly.LoadFile(reference);
-                    var foundTypes = assembly.GetTypes()
-                                             .Where(t => typeof(Attribute).IsAssignableFrom(t))
-                                             .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
-                                             .ToList();
+
+                    var foundTypes = assembly.GetTypesSafely()
+                        .Where(t => typeof(Attribute).IsAssignableFrom(t))
+                        .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
+                        .ToList();
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }
                 catch (Exception e)
                 {
-
-                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {((System.Reflection.ReflectionTypeLoadException)e.GetBaseException()).LoaderExceptions.First()}");
+                    logger.Warn(
+                        $"Could not load reference assembly '{reference}'. Details: {((ReflectionTypeLoadException)e.GetBaseException()).LoaderExceptions.First()}");
                 }
             }
 
@@ -471,7 +470,7 @@ namespace PS.Build.Tasks
             var adaptationTypes = AppDomain.CurrentDomain
                                            .GetAssemblies()
                                            .Where(a => pathBanns.Any(p => a.Location?.Contains(p) != true))
-                                           .SelectMany(a => a.GetTypes().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
+                                           .SelectMany(a => a.GetTypesSafely().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
                                            .Where(t => !t.IsAbstract)
                                            .ToList();
 

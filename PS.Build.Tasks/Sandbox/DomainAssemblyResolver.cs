@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,12 +29,15 @@ namespace PS.Build.Tasks
         private readonly string[] _bannedDirectories;
         private readonly ILogger _logger;
 
+        private ConcurrentDictionary<string, Assembly> _cache;
+
         #region Constructors
 
         public DomainAssemblyResolver(string[] additionalDirectories, string[] assemblyReferences, ILogger logger)
         {
             if (additionalDirectories == null) throw new ArgumentNullException(nameof(additionalDirectories));
             if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
+            _cache = new ConcurrentDictionary<string, Assembly>();
             _assemblyReferences = assemblyReferences;
             _logger = logger;
             _additionalDirectories = additionalDirectories;
@@ -60,7 +64,11 @@ namespace PS.Build.Tasks
 
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var queryAssemblyName = args.Name.Split(',').FirstOrDefault();
+            var queryAssemblyName = args.Name.Split(',').FirstOrDefault() ?? string.Empty;
+
+            Assembly result;
+            if (_cache.TryGetValue(queryAssemblyName, out result)) return result;
+
             var resolved = _assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
                                                                                  queryAssemblyName,
                                                                                  StringComparison.InvariantCultureIgnoreCase));
@@ -79,11 +87,19 @@ namespace PS.Build.Tasks
                 resolved = FindAtLocation(queryAssemblyName, directory);
             }
 
+            if (string.IsNullOrWhiteSpace(resolved))
+            {
+                _logger.Info($"# Assembly {queryAssemblyName} not resolved");
+                _cache.TryAdd(queryAssemblyName, null);
+                return null;
+            }
+
             _logger.Info($"# Assembly {queryAssemblyName} resolved with {resolved}");
 
-            return string.IsNullOrWhiteSpace(resolved)
-                ? null
-                : Assembly.LoadFile(resolved);
+            result = Assembly.LoadFile(resolved);
+            _cache.TryAdd(queryAssemblyName, result);
+
+            return result;
         }
 
         #endregion
