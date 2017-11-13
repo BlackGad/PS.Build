@@ -3,24 +3,29 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using PS.Build.Services;
+using PS.Build.Types;
 
 namespace PS.Build.Tasks
 {
     class Sanbox : IDisposable
     {
         private readonly AppDomain _appDomain;
+        private readonly object _disposeLocker;
         private readonly ILogger _logger;
+        private bool _isDisposed;
 
         #region Constructors
 
         public Sanbox(IExplorer explorer, ILogger logger)
         {
             _logger = logger;
+            _disposeLocker = new object();
             var executingAssembly = Assembly.GetExecutingAssembly();
             var additionalReferenceDirectories = new[]
             {
                 Path.GetDirectoryName(executingAssembly.Location),
-                AppDomain.CurrentDomain.BaseDirectory
+                AppDomain.CurrentDomain.BaseDirectory,
+                explorer.Directories[BuildDirectory.Target]
             };
 
             var configurationFile = executingAssembly.Location + ".config";
@@ -29,9 +34,7 @@ namespace PS.Build.Tasks
                 //Unit tests
                 configurationFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.config");
             }
-            TaskAssemblyResolver = new DomainAssemblyResolver(additionalReferenceDirectories,
-                                                              Enumerable.Empty<string>().ToArray(),
-                                                              _logger);
+
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
@@ -60,7 +63,6 @@ namespace PS.Build.Tasks
         public SandboxClient Client { get; }
 
         public DomainAssemblyResolver SandboxAssemblyResolver { get; }
-        public DomainAssemblyResolver TaskAssemblyResolver { get; }
 
         #endregion
 
@@ -68,9 +70,15 @@ namespace PS.Build.Tasks
 
         public void Dispose()
         {
-            TaskAssemblyResolver.Dispose();
-            SandboxAssemblyResolver.Dispose();
-            AppDomain.Unload(_appDomain);
+            lock (_disposeLocker)
+            {
+                if (_isDisposed) return;
+                _logger.Info("$ Sandbox disposed");
+                SandboxAssemblyResolver.Dispose();
+                AppDomain.Unload(_appDomain);
+
+                _isDisposed = true;
+            }
         }
 
         #endregion

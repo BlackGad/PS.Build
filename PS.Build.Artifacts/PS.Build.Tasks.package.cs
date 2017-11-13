@@ -14,6 +14,7 @@
 [assembly: NugetFiles(@"{dir.project}PS.Build.Tasks.targets", @"build", ID = "PS.Build.Tasks")]
 
 [assembly: NugetFiles(@"{dir.solution}PS.Build.Tasks\bin\{prop.configuration}\*.dll", @"tasks\MSBuild", ID = "PS.Build.Tasks")]
+[assembly: NugetFiles(@"{dir.solution}PS.Build.Tasks\bin\{prop.configuration}\*.pdb", @"tasks\MSBuild", ID = "PS.Build.Tasks")]
 [assembly: NugetFiles(@"{dir.solution}PS.Build.Tasks\bin\{prop.configuration}\PS.Build.Tasks.dll.config", @"tasks\MSBuild", ID = "PS.Build.Tasks")]
 
 [assembly: NugetBuild(@"{dir.solution}_Artifacts\{prop.configuration}.{prop.platform}", ID = "PS.Build.Tasks")]

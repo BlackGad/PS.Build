@@ -20,10 +20,21 @@
 		</ItemGroup>
 	</Target>
 	
+    <Target Name="Failure adaptation cleanup task">
+		<FailureCleanupTask/>
+	</Target>
+    
+    <Target Name="Success adaptation cleanup task"
+            AfterTargets="Execute post build adaptations">
+        <SuccessCleanupTask/>
+	</Target>
+    
 	<Target Name="Execute post build adaptations"
 			AfterTargets="AfterBuild">
 
 		<PostBuildAdaptationExecutionTask/>
+        
+        <OnError ExecuteTargets="Failure adaptation cleanup task" />
 		
 	</Target>
 
@@ -36,7 +47,7 @@
 			PropertyProjectFile="$(MSBuildProjectFile)"			
 			PropertyTargetPath="$(TargetPath)"
 			PropertyTargetName="$(TargetName)"
-      PropertyTargetExtension="$(TargetExt)"
+			PropertyTargetExtension="$(TargetExt)"
 			PropertyPlatform="$(Platform)"
 			PropertyConfiguration="$(Configuration)"
 			PropertyRootNamespace="$(RootNamespace)"
@@ -67,8 +78,11 @@
 			<Output TaskParameter="ArtifactsAdditionalFiles" ItemName="_ArtifactsAdditionalFiles" />
 			<Output TaskParameter="ArtifactsContent" ItemName="_ArtifactsContent" />
 			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
-			
+            
 		</PreBuildAdaptationExecutionTask>
+        
+        <OnError ExecuteTargets="Failure adaptation cleanup task" />
+        
 	</Target>
 
 </Project>
