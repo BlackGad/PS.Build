@@ -170,6 +170,8 @@
     <Compile Include="Services\Logger\Logger.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\SuccessCleanupTask.cs" />
+    <Compile Include="Tasks\FailureCleanupTask.cs" />
     <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />
     <Compile Include="Tasks\PostBuildAdaptationExecutionTask.cs" />
   </ItemGroup>

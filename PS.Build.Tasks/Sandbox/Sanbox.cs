@@ -10,13 +10,16 @@ namespace PS.Build.Tasks
     class Sanbox : IDisposable
     {
         private readonly AppDomain _appDomain;
+        private readonly object _disposeLocker;
         private readonly ILogger _logger;
+        private bool _isDisposed;
 
         #region Constructors
 
         public Sanbox(IExplorer explorer, ILogger logger)
         {
             _logger = logger;
+            _disposeLocker = new object();
             var executingAssembly = Assembly.GetExecutingAssembly();
             var additionalReferenceDirectories = new[]
             {
@@ -31,7 +34,7 @@ namespace PS.Build.Tasks
                 //Unit tests
                 configurationFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.config");
             }
-        
+
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
@@ -67,8 +70,15 @@ namespace PS.Build.Tasks
 
         public void Dispose()
         {
-            SandboxAssemblyResolver.Dispose();
-            AppDomain.Unload(_appDomain);
+            lock (_disposeLocker)
+            {
+                if (_isDisposed) return;
+                _logger.Info("$ Sandbox disposed");
+                SandboxAssemblyResolver.Dispose();
+                AppDomain.Unload(_appDomain);
+
+                _isDisposed = true;
+            }
         }
 
         #endregion

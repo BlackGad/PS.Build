@@ -9,5 +9,7 @@
 	
 	<UsingTask TaskName="PS.Build.Tasks.PreBuildAdaptationExecutionTask" AssemblyFile="$(PSBuildTasksPath)" />
 	<UsingTask TaskName="PS.Build.Tasks.PostBuildAdaptationExecutionTask" AssemblyFile="$(PSBuildTasksPath)" />
+	<UsingTask TaskName="PS.Build.Tasks.FailureCleanupTask" AssemblyFile="$(PSBuildTasksPath)" />
+	<UsingTask TaskName="PS.Build.Tasks.SuccessCleanupTask" AssemblyFile="$(PSBuildTasksPath)" />
 
 </Project>
