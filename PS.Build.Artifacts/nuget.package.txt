@@ -31,9 +31,7 @@ using PS.Build.Nuget.Attributes;
 
 [assembly: NugetFilesFromTarget]
 [assembly: NugetPackageDependenciesFromConfiguration]
-[assembly: NugetPackageDependenciesFilter("NuGet.*")]
-[assembly: NugetPackageDependenciesFilter("PS.Build.*")]
-[assembly: NugetPackageDependenciesFilter("Newtonsoft.Json")]
+[assembly: NugetPackageDependenciesFilter("PS.Build*")]
 [assembly: NugetBuild]
 [assembly: NugetDebugSubstitution]
 

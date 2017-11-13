@@ -469,7 +469,7 @@ namespace PS.Build.Tasks
             //Recheck attributes for inheritance from adaptation types
             var adaptationTypes = AppDomain.CurrentDomain
                                            .GetAssemblies()
-                                           .Where(a => pathBanns.Any(p => a.Location?.Contains(p) != true))
+                                           .Where(a => pathBanns.Any(p => a.Location.Contains(p) != true))
                                            .SelectMany(a => a.GetTypesSafely().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
                                            .Where(t => !t.IsAbstract)
                                            .ToList();
