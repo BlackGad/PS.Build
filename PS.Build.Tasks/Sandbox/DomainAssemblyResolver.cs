@@ -25,7 +25,7 @@ namespace PS.Build.Tasks
         public DomainAssemblyResolver(string[] directoriesToScan, ILogger logger)
         {
             if (directoriesToScan == null) throw new ArgumentNullException(nameof(directoriesToScan));
-            _temporaryDirectory = Path.GetTempPath().EnsureSlash();
+            _temporaryDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")).EnsureSlash();
             //_temporaryDirectory = @"e:\temp\refs\";
 
             _cache = new ConcurrentDictionary<string, Assembly>();
