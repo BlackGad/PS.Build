@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using PS.Build.Extensions;
 using PS.Build.Services;
 
 namespace PS.Build.Tasks
@@ -10,42 +13,24 @@ namespace PS.Build.Tasks
     class DomainAssemblyResolver : MarshalByRefObject,
                                    IDisposable
     {
-        #region Static members
+        private readonly ConcurrentDictionary<string, Assembly> _cache;
 
-        private static string FindAtLocation(string queryAssemblyName, string location)
-        {
-            if (string.IsNullOrEmpty(location)) return null;
-            return Directory.GetFiles(location, "*.dll")
-                            .FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                               queryAssemblyName,
-                                                               StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        #endregion
-
-        private readonly string[] _additionalDirectories;
-
-        private readonly string[] _assemblyReferences;
-        private readonly string[] _bannedDirectories;
+        private readonly List<string> _directoriesToScan;
         private readonly ILogger _logger;
 
-        private ConcurrentDictionary<string, Assembly> _cache;
+        private readonly string _temporaryDirectory;
 
         #region Constructors
 
-        public DomainAssemblyResolver(string[] additionalDirectories, string[] assemblyReferences, ILogger logger)
+        public DomainAssemblyResolver(string[] directoriesToScan, ILogger logger)
         {
-            if (additionalDirectories == null) throw new ArgumentNullException(nameof(additionalDirectories));
-            if (assemblyReferences == null) throw new ArgumentNullException(nameof(assemblyReferences));
+            if (directoriesToScan == null) throw new ArgumentNullException(nameof(directoriesToScan));
+            _temporaryDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")).EnsureSlash();
+            //_temporaryDirectory = @"e:\temp\refs\";
+
             _cache = new ConcurrentDictionary<string, Assembly>();
-            _assemblyReferences = assemblyReferences;
             _logger = logger;
-            _additionalDirectories = additionalDirectories;
-            _bannedDirectories = new[]
-            {
-                $"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)}\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework",
-                $"{Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86)}\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework"
-            };
+            _directoriesToScan = new List<string>(directoriesToScan.Select(d => d.ToLowerInvariant().EnsureSlash()));
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
@@ -64,42 +49,99 @@ namespace PS.Build.Tasks
 
         private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var queryAssemblyName = args.Name.Split(',').FirstOrDefault() ?? string.Empty;
-
             Assembly result;
-            if (_cache.TryGetValue(queryAssemblyName, out result)) return result;
+            if (_cache.TryGetValue(args.Name, out result)) return result;
 
-            var resolved = _assemblyReferences.FirstOrDefault(r => string.Equals(Path.GetFileNameWithoutExtension(r),
-                                                                                 queryAssemblyName,
-                                                                                 StringComparison.InvariantCultureIgnoreCase));
+            var pattern = @"^(?<name>[^,]+),[ ]*Version=(?<version>[^,]+)(,[ ]*Culture=(?<culture>[^,]+))?(,[ ]*PublicKeyToken=(?<token>[^,]+))?$";
+            var matchResult = Regex.Match(args.Name, pattern);
+            if (!matchResult.Success) return null;
 
-            foreach (var directory in _additionalDirectories)
+            var assemblyName = matchResult.Groups["name"].Value;
+            Version assemblyVersion;
+            Version.TryParse(matchResult.Groups["version"].Value, out assemblyVersion);
+
+            var expectedAssemblyDirectory = Path.Combine(_temporaryDirectory, assemblyName).EnsureSlash();
+            var expectedAssemblyPath = Path.Combine(expectedAssemblyDirectory, assemblyVersion.ToString(), assemblyName + ".dll");
+
+            string resolvedPath = null;
+            if (File.Exists(expectedAssemblyPath)) resolvedPath = expectedAssemblyPath;
+            else
             {
-                if (resolved != null) break;
-                resolved = FindAtLocation(queryAssemblyName, directory);
+                foreach (var directory in _directoriesToScan)
+                {
+                    var possibleAssemblyPath = Path.Combine(directory, assemblyName + ".dll");
+                    if (!File.Exists(possibleAssemblyPath)) continue;
+
+                    CacheAssembly(possibleAssemblyPath);
+                }
             }
 
-            foreach (var reference in _assemblyReferences)
+            if (File.Exists(expectedAssemblyPath)) resolvedPath = expectedAssemblyPath;
+            else
             {
-                if (resolved != null) break;
-                if (_bannedDirectories.Any(b => reference.StartsWith(b, StringComparison.InvariantCultureIgnoreCase))) continue;
-                var directory = Path.GetDirectoryName(reference);
-                resolved = FindAtLocation(queryAssemblyName, directory);
+                var versions = IOExtensions.EnumerateDirectories(expectedAssemblyDirectory + "\\*")
+                                           .Select(d =>
+                                           {
+                                               d = d.TrimEnd('\\');
+                                               Version v;
+                                               Version.TryParse(d.Substring(d.LastIndexOf('\\') + 1), out v);
+                                               return v;
+                                           })
+                                           .Where(v => v != null)
+                                           .OrderByDescending(r => r).ToList();
+
+                if (versions.Any()) resolvedPath = Path.Combine(expectedAssemblyDirectory, versions.First().ToString(), assemblyName + ".dll");
             }
 
-            if (string.IsNullOrWhiteSpace(resolved))
+            if (string.IsNullOrWhiteSpace(resolvedPath))
             {
-                _logger.Info($"# Assembly {queryAssemblyName} not resolved");
-                _cache.TryAdd(queryAssemblyName, null);
+                _logger.Warn($"# Assembly {args.Name} not resolved");
+                _cache.TryAdd(args.Name, null);
                 return null;
             }
 
-            _logger.Info($"# Assembly {queryAssemblyName} resolved with {resolved}");
+            _logger.Info($"# Assembly {args.Name} resolved with {resolvedPath}");
 
-            result = Assembly.LoadFile(resolved);
-            _cache.TryAdd(queryAssemblyName, result);
+            result = Assembly.LoadFile(resolvedPath);
+            _cache.TryAdd(args.Name, result);
 
             return result;
+        }
+
+        #endregion
+
+        #region Members
+
+        public Assembly LoadAssembly(string path)
+        {
+            var fileDirectory = Path.GetDirectoryName(path)?.ToLowerInvariant().EnsureSlash();
+            if (fileDirectory == null) return null;
+
+            if (_directoriesToScan.All(d => d != fileDirectory)) _directoriesToScan.Add(fileDirectory);
+
+            return Assembly.LoadFile(CacheAssembly(path));
+        }
+
+        private string CacheAssembly(string path)
+        {
+            try
+            {
+                var assemblyName = AssemblyName.GetAssemblyName(path);
+
+                var cachedAssemblyDirectory = Path.Combine(_temporaryDirectory, assemblyName.Name, assemblyName.Version.ToString()).EnsureSlash();
+                var cachedAssemblyPath = Path.Combine(cachedAssemblyDirectory, assemblyName.Name + ".dll");
+
+                if (File.Exists(cachedAssemblyPath)) return cachedAssemblyPath;
+                cachedAssemblyDirectory.EnsureDirectoryExist();
+                File.Copy(path, cachedAssemblyPath);
+                if (File.Exists(path + ".config")) File.Copy(path + ".config", cachedAssemblyPath + ".config");
+                return cachedAssemblyPath;
+            }
+            catch (Exception e)
+            {
+                _logger.Debug($"Could not cache assembly {path}. Details: " + e.GetBaseException().Message);
+                return null;
+            }
         }
 
         #endregion

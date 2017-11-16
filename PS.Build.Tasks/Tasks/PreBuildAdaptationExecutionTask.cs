@@ -178,7 +178,6 @@ namespace PS.Build.Tasks
         {
             if (!Debugger.IsAttached && OptionDebug) Debugger.Launch();
             var logger = new Logger(Log);
-            
             try
             {
                 var items = ItemsProperties.Enumerate().ToDictionary(pair => pair.Key,
@@ -214,7 +213,7 @@ namespace PS.Build.Tasks
                                             properties);
 
                 var sandbox = new Sanbox(explorer, logger);
-                BuildEngine4.RegisterTaskObject(typeof(Sanbox), sandbox, RegisteredTaskObjectLifetime.Build, false);
+                BuildEngine4.RegisterTaskObject(BuildEngine.ProjectFileOfTaskNode, sandbox, RegisteredTaskObjectLifetime.Build, false);
                 var artifacts = sandbox.Client.ExecutePreBuildAdaptations(logger);
                 if (artifacts.Any())
                 {

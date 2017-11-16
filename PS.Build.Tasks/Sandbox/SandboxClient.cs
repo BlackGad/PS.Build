@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -62,6 +63,8 @@ namespace PS.Build.Tasks
 
         #endregion
 
+        private readonly DomainAssemblyResolver _assemblyResolver;
+
         private readonly IDynamicVault _dynamicVault;
         private readonly IExplorer _explorer;
         private readonly MacroResolver _macroResolver;
@@ -71,9 +74,11 @@ namespace PS.Build.Tasks
 
         #region Constructors
 
-        public SandboxClient(IExplorer explorer)
+        public SandboxClient(DomainAssemblyResolver assemblyResolver, IExplorer explorer)
         {
+            if (assemblyResolver == null) throw new ArgumentNullException(nameof(assemblyResolver));
             if (explorer == null) throw new ArgumentNullException(nameof(explorer));
+            _assemblyResolver = assemblyResolver;
             _explorer = explorer;
             _dynamicVault = new DynamicVault();
             _nugetExplorer = new NugetExplorer(_explorer.Directories[BuildDirectory.Solution]);
@@ -447,22 +452,19 @@ namespace PS.Build.Tasks
             foreach (var reference in references)
             {
                 if (pathBanns.Any(p => reference.Contains(p))) continue;
-
                 try
                 {
-                    var assembly = Assembly.LoadFile(reference);
-
+                    var assembly = _assemblyResolver.LoadAssembly(reference);
                     var foundTypes = assembly.GetTypesSafely()
-                        .Where(t => typeof(Attribute).IsAssignableFrom(t))
-                        .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
-                        .ToList();
+                                             .Where(t => typeof(Attribute).IsAssignableFrom(t))
+                                             .Where(t => t.GetCustomAttribute<DesignerAttribute>()?.DesignerTypeName == "PS.Build.Adaptation")
+                                             .ToList();
 
                     adaptationDefinitionTypes.AddRange(foundTypes);
                 }
                 catch (Exception e)
                 {
-                    logger.Warn(
-                        $"Could not load reference assembly '{reference}'. Details: {((ReflectionTypeLoadException)e.GetBaseException()).LoaderExceptions.First()}");
+                    logger.Warn($"Could not load reference assembly '{reference}'. Details: {e.GetBaseException().Message}");
                 }
             }
 
@@ -470,7 +472,8 @@ namespace PS.Build.Tasks
             var adaptationTypes = AppDomain.CurrentDomain
                                            .GetAssemblies()
                                            .Where(a => pathBanns.Any(p => a.Location.Contains(p) != true))
-                                           .SelectMany(a => a.GetTypesSafely().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
+                                           .SelectMany(
+                                               a => a.GetTypesSafely().Where(t => adaptationDefinitionTypes.Any(adf => adf.IsAssignableFrom(t))))
                                            .Where(t => !t.IsAbstract)
                                            .ToList();
 

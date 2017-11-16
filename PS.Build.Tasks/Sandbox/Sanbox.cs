@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using PS.Build.Services;
-using PS.Build.Types;
 
 namespace PS.Build.Tasks
 {
@@ -24,10 +23,8 @@ namespace PS.Build.Tasks
             var additionalReferenceDirectories = new[]
             {
                 Path.GetDirectoryName(executingAssembly.Location),
-                AppDomain.CurrentDomain.BaseDirectory,
-                explorer.Directories[BuildDirectory.Target]
+                AppDomain.CurrentDomain.BaseDirectory
             };
-
             var configurationFile = executingAssembly.Location + ".config";
             if (!File.Exists(configurationFile))
             {
@@ -38,16 +35,15 @@ namespace PS.Build.Tasks
             var domainSetup = new AppDomainSetup
             {
                 ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
-                ConfigurationFile = configurationFile
+                ConfigurationFile = configurationFile,
+                
             };
 
             try
             {
                 _appDomain = AppDomain.CreateDomain(Guid.NewGuid().ToString("N"), AppDomain.CurrentDomain.Evidence, domainSetup);
-                SandboxAssemblyResolver = Create<DomainAssemblyResolver>(additionalReferenceDirectories,
-                                                                         explorer.References.Select(r => r.FullPath).ToArray(),
-                                                                         _logger);
-                Client = Create<SandboxClient>(explorer);
+                SandboxAssemblyResolver = Create<DomainAssemblyResolver>(additionalReferenceDirectories, _logger);
+                Client = Create<SandboxClient>(SandboxAssemblyResolver, explorer);
             }
             catch
             {

@@ -12,7 +12,8 @@ namespace PS.Build.Tasks
         public override bool Execute()
         {
             var logger = new Logger(Log);
-            var sandbox = BuildEngine4.GetRegisteredTaskObject(typeof(Sanbox), RegisteredTaskObjectLifetime.Build) as Sanbox;
+
+            var sandbox = BuildEngine4.GetRegisteredTaskObject(BuildEngine.ProjectFileOfTaskNode, RegisteredTaskObjectLifetime.Build) as Sanbox;
             if (sandbox == null) return true;
 
             try
