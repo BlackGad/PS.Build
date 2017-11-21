@@ -14,5 +14,6 @@
 [assembly: NugetPackageAssemblyReference(@"PS.Build.Essentials.dll", ID = "PS.Build.Essentials")]
 
 [assembly: NugetBuild(@"{dir.solution}_Artifacts\{prop.configuration}.{prop.platform}", ID = "PS.Build.Essentials")]
+[assembly: NugetDebugSubstitution(ID = "PS.Build.Essentials")]
 
 #endif
