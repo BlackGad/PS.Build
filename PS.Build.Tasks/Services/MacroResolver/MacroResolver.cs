@@ -44,6 +44,12 @@ namespace PS.Build.Tasks.Services
 
         public string Resolve(string source, out ValidationResult[] errors)
         {
+            if (source == null)
+            {
+                errors = new ValidationResult[] { };
+                return null;
+            }
+
             var matchPattern = $"(?<{MacroGroup}>{{[^}}]+}})";
 
             var resultErrors = new List<ValidationResult>();
