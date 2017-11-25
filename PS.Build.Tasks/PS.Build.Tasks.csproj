@@ -31,14 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build.Framework, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Build.Framework.15.3.409\lib\net46\Microsoft.Build.Framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Utilities.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Build.Utilities.Core.15.3.409\lib\net46\Microsoft.Build.Utilities.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Build.Utilities.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.CodeAnalysis, Version=2.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeAnalysis.Common.2.4.0\lib\netstandard1.3\Microsoft.CodeAnalysis.dll</HintPath>
       <Private>True</Private>
@@ -143,7 +137,9 @@
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Sandbox\AdaptationUsage.cs" />
-    <Compile Include="Sandbox\AttributeVirtualizationVisitor.cs" />
+    <Compile Include="Sandbox\CompileItemRewriterVisitor.cs" />
+    <Compile Include="Sandbox\SuspiciousAttributeVisitor.cs" />
+    <Compile Include="Sandbox\CompileItemReplacement.cs" />
     <Compile Include="Sandbox\DomainAssemblyResolver.cs" />
     <Compile Include="Services\Logger\DelegateDisposable.cs" />
     <Compile Include="Services\DynamicVault.cs" />
@@ -170,6 +166,7 @@
     <Compile Include="Services\Logger\Logger.cs" />
     <Compile Include="Extensions\RoslynExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tasks\ReplaceCompileItemsTask.cs" />
     <Compile Include="Tasks\SuccessCleanupTask.cs" />
     <Compile Include="Tasks\FailureCleanupTask.cs" />
     <Compile Include="Tasks\PreBuildAdaptationExecutionTask.cs" />

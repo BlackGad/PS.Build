@@ -16,7 +16,7 @@
 			<None Include="@(_ArtifactsNone)" />
 
 			<FileWrites Include="@(_ArtifactsTemporary)" />
-
+      
 		</ItemGroup>
 	</Target>
 	
@@ -80,9 +80,19 @@
 			<Output TaskParameter="ArtifactsNone" ItemName="_ArtifactsNone" />
             
 		</PreBuildAdaptationExecutionTask>
-        
-        <OnError ExecuteTargets="Failure adaptation cleanup task" />
-        
+    
+    <ReplaceCompileItemsTask ItemsCompile="@(Compile)" >
+      <Output TaskParameter="CompilesToRemove" ItemName="_CompilesToRemove" />
+      <Output TaskParameter="CompilesToAdd" ItemName="_CompilesToAdd" />
+    </ReplaceCompileItemsTask>
+    
+    <ItemGroup>
+      <Compile Remove="@(_CompilesToRemove)"/>
+      <Compile Include="@(_CompilesToAdd)"/>
+      <FileWrites Include="@(_CompilesToAdd)" />
+    </ItemGroup>
+    
+    <OnError ExecuteTargets="Failure adaptation cleanup task" />
 	</Target>
 
 </Project>
