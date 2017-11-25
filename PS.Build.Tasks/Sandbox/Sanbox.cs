@@ -34,7 +34,7 @@ namespace PS.Build.Tasks
 
             var domainSetup = new AppDomainSetup
             {
-                ApplicationBase = Path.GetDirectoryName(executingAssembly.Location),
+                ApplicationBase = Path.GetDirectoryName(configurationFile),
                 ConfigurationFile = configurationFile,
                 
             };
