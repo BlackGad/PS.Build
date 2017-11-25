@@ -177,6 +177,7 @@ namespace PS.Build.Tasks
         public override bool Execute()
         {
             if (!Debugger.IsAttached && OptionDebug) Debugger.Launch();
+
             var logger = new Logger(Log);
             try
             {

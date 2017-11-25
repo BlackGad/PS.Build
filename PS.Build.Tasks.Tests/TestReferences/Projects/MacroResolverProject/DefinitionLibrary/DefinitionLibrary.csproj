@@ -35,7 +35,7 @@
       <HintPath>..\..\..\..\bin\Debug\PS.Build.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\bin\Debug\PS.Build.dll')">
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' AND Exists('..\..\..\..\bin\Release\PS.Build.dll')">
     <Reference Include="PS.Build">
       <HintPath>..\..\..\..\bin\Release\PS.Build.dll</HintPath>
     </Reference>

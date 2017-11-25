@@ -172,6 +172,60 @@ namespace PS.Build.Tasks
             return result.ToArray();
         }
 
+        public CompileItemReplacement[] ReplaceCompileItems(ILogger logger)
+        {
+            var result = new List<CompileItemReplacement>();
+            logger.Debug("------------");
+            logger.Info("Replacing source code files which contains adaptation usages");
+
+            var projectDirectory = _explorer.Directories[BuildDirectory.Project];
+            var intermediateDirectory = _explorer.Directories[BuildDirectory.Intermediate];
+
+            var grouppedUsages = _usages.ToLookup(u => u.SyntaxTree.FilePath, u => u);
+            logger.Info($"{grouppedUsages.Count} files will be replaced");
+
+            //Debugger.Launch();
+
+            foreach (var group in grouppedUsages)
+            {
+                var sourceFile = group.Key;
+
+                //if (sourceFile.StartsWith(projectDirectory, StringComparison.InvariantCultureIgnoreCase))
+                //    sourceFile = sourceFile.Substring(projectDirectory.Length);
+
+                var replacedFile = Path.Combine(intermediateDirectory, "__replacements", sourceFile.GetMD5Hash() + ".cs");
+
+                logger.Debug("+ Replacement");
+                logger.Debug("    Removed: " + sourceFile);
+                logger.Debug("    Added: " + replacedFile);
+
+                try
+                {
+                    var visitor = new CompileItemRewriterVisitor(group);
+                    var syntaxTree = group.FirstOrDefault()?.SyntaxTree;
+                    if (syntaxTree == null) continue;
+                    var rewrittenItem = visitor.Visit(syntaxTree.GetRoot());
+
+                    Path.GetDirectoryName(replacedFile)?.EnsureDirectoryExist();
+                    File.WriteAllText(replacedFile, rewrittenItem.ToFullString());
+
+                    var replacement = new CompileItemReplacement
+                    {
+                        Source = sourceFile,
+                        Target = replacedFile
+                    };
+
+                    result.Add(replacement);
+                }
+                catch (Exception e)
+                {
+                    logger.Warn($"File '{sourceFile}' could not be replaced. Details: " + e.GetBaseException().Message);
+                }
+            }
+
+            return result.ToArray();
+        }
+
         private List<AdaptationUsage> AnalyzeSemanticForAdaptationUsages(SuspiciousAttributeSyntaxes suspiciousAttributeSyntaxes,
                                                                          CSharpCompilation compilation,
                                                                          ILogger logger)
@@ -191,6 +245,8 @@ namespace PS.Build.Tasks
                     {
                         var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
                         var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
+                        if (symbol == null) continue;
+
                         var resolvedType = pair.Value.FirstOrDefault(t => symbol.ResolveType() == t);
                         var attributeData = pair.Key.ResolveAttributeData(semanticModel);
                         if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
@@ -231,7 +287,7 @@ namespace PS.Build.Tasks
             logger.Debug("------------");
             logger.Info("Analyzing syntax");
 
-            var visitor = new AttributeVirtualizationVisitor(adaptationTypes);
+            var visitor = new SuspiciousAttributeVisitor(adaptationTypes);
             foreach (var syntaxTree in syntaxTrees)
             {
                 visitor.Visit(syntaxTree.GetRoot());
@@ -266,7 +322,9 @@ namespace PS.Build.Tasks
             var syntaxTrees = _explorer.Items[BuildItem.Compile].Select(r =>
             {
                 var text = File.ReadAllText(r.FullPath);
-                return CSharpSyntaxTree.ParseText(text, path: r.FullPath, options: new CSharpParseOptions(preprocessorSymbols: new[] { "DEBUG", "ADAPTATION" }));
+                return CSharpSyntaxTree.ParseText(text,
+                                                  path: r.FullPath,
+                                                  options: new CSharpParseOptions(preprocessorSymbols: new[] { "DEBUG", "ADAPTATION" }));
             }).ToList();
             return syntaxTrees;
         }
