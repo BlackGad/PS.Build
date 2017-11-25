@@ -103,7 +103,6 @@ namespace PS.Build.Tasks
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
         {
             var result = new List<SerializableArtifact>();
-
             var adaptationTypes = SearchCompiledAdaptations(logger);
             if (!adaptationTypes.Any())
             {
@@ -191,6 +190,8 @@ namespace PS.Build.Tasks
                     {
                         var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
                         var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
+                        if(symbol == null) continue;
+
                         var resolvedType = pair.Value.FirstOrDefault(t => symbol.ResolveType() == t);
                         var attributeData = pair.Key.ResolveAttributeData(semanticModel);
                         if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
