@@ -46,6 +46,8 @@
     <Compile Include="Services\NugetExplorer\INugetExplorer.cs" />
     <Compile Include="Services\IDynamicVault.cs" />
     <Compile Include="Types\BuildStep.cs" />
+    <Compile Include="Types\RecursivePath.cs" />
+    <Compile Include="Types\SearchResult.cs" />
     <Compile Include="Types\IMacroHandler.cs" />
     <Compile Include="Types\HandledMacro.cs" />
     <Compile Include="Types\IArtifactBuilder.cs" />
