@@ -178,20 +178,14 @@ namespace PS.Build.Tasks
             logger.Debug("------------");
             logger.Info("Replacing source code files which contains adaptation usages");
 
-            var projectDirectory = _explorer.Directories[BuildDirectory.Project];
             var intermediateDirectory = _explorer.Directories[BuildDirectory.Intermediate];
 
-            var grouppedUsages = _usages.ToLookup(u => u.SyntaxTree.FilePath, u => u);
-            logger.Info($"{grouppedUsages.Count} files will be replaced");
+            var groupedUsages = _usages.Enumerate().ToLookup(u => u.SyntaxTree.FilePath, u => u);
+            logger.Info($"{groupedUsages.Count} files will be replaced");
 
-            //Debugger.Launch();
-
-            foreach (var group in grouppedUsages)
+            foreach (var group in groupedUsages)
             {
                 var sourceFile = group.Key;
-
-                //if (sourceFile.StartsWith(projectDirectory, StringComparison.InvariantCultureIgnoreCase))
-                //    sourceFile = sourceFile.Substring(projectDirectory.Length);
 
                 var replacedFile = Path.Combine(intermediateDirectory, "__replacements", sourceFile.GetMD5Hash() + ".cs");
 
