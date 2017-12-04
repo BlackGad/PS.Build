@@ -24,9 +24,14 @@ namespace PS.Build.Essentials.Attributes
         #region Properties
 
         /// <summary>
-        ///     Gets or sets a value indicating whether to start the process.
+        ///     Gets or sets a value indicating whether to start file operations.
         /// </summary>
         public BuildStep BuildStep { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether adaptation fails if file list is empty
+        /// </summary>
+        public bool FailOnEmpty { get; set; }
 
         public string[] FilterPatterns { get; }
 
@@ -81,7 +86,10 @@ namespace PS.Build.Essentials.Attributes
                                                    .Select(f => macroResolver.Resolve(f))
                                                    .ToArray();
 
-                Process(EnumerateFiles(provider, selectPattern, filterPatterns), provider);
+                var files = EnumerateFiles(provider, selectPattern, filterPatterns);
+                if (!files.Any() && FailOnEmpty)
+                    provider.GetService<ILogger>().Error("There is no available files to process");
+                Process(files, provider);
             }
         }
 
@@ -94,7 +102,10 @@ namespace PS.Build.Essentials.Attributes
                 var filterPatterns = FilterPatterns.Enumerate()
                                                    .Select(f => macroResolver.Resolve(f))
                                                    .ToArray();
-                Process(EnumerateFiles(provider, selectPattern, filterPatterns), provider);
+                var files = EnumerateFiles(provider, selectPattern, filterPatterns);
+                if (!files.Any() && FailOnEmpty)
+                    provider.GetService<ILogger>().Error("There is no available files to process");
+                Process(files, provider);
             }
         }
 

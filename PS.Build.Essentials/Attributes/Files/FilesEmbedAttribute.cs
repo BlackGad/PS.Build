@@ -17,6 +17,7 @@ namespace PS.Build.Essentials.Attributes
         public FilesEmbedAttribute(string selectPattern, params string[] filterPatterns) :
             base(selectPattern, filterPatterns)
         {
+            BuildStep = BuildStep.PreBuild;
         }
 
         #endregion
@@ -31,29 +32,31 @@ namespace PS.Build.Essentials.Attributes
 
         protected override void Process(RecursivePath[] files, IServiceProvider provider)
         {
-            //var logger = provider.GetService<ILogger>();
-            //var macroResolver = provider.GetService<IMacroResolver>();
-            //var targetFolder = macroResolver.Resolve(TargetFolder);
-            //var explorer = provider.GetService<IExplorer>();
-            //if (string.IsNullOrWhiteSpace(targetFolder)) targetFolder = explorer.Directories[BuildDirectory.Target];
+            var logger = provider.GetService<ILogger>();
 
-            //logger.Info(files.Any() ? $"There is {files.Length} files to move:" : "There is no files to move");
+            if (BuildStep.HasFlag(BuildStep.PostBuild))
+            {
+                logger.Error("Files could not be embedded on PostBuild event");
+                return;
+            }
 
-            //foreach (var file in files)
-            //{
-            //    var targetFile = Path.Combine(targetFolder, file.Recursive, file.Postfix);
-            //    try
-            //    {
-            //        Path.GetDirectoryName(targetFile).EnsureDirectoryExist();
-            //        File.Move(file.Original, targetFile);
-            //        logger.Info($"* Moved: {file.Original} -> {targetFile}");
-            //        if (RemoveEmptyDirectories) file.RemoveEmptyDirectories();
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        logger.Warn($"Cannot move {file.Original} file to {targetFile}. Details: {e.GetBaseException().Message}");
-            //    }
-            //}
+            var macroResolver = provider.GetService<IMacroResolver>();
+            var artifactory = provider.GetService<IArtifactory>();
+            var namePrefix = macroResolver.Resolve(NamePrefix ?? string.Empty);
+            logger.Info(files.Any() ? $"There is {files.Length} files to embed:" : "There is no files to embed");
+
+            foreach (var file in files)
+            {
+                var artifact = artifactory.Artifact(file.Original, BuildItem.EmbeddedResource)
+                                          .Permanent();
+
+                if (!string.IsNullOrWhiteSpace(namePrefix) && !string.IsNullOrWhiteSpace(file.Recursive))
+                {
+                    artifact.Metadata("Link", Path.Combine(namePrefix, file.Recursive, file.Postfix));
+                }
+
+                artifact.Dependencies().FileDependency(file.Original);
+            }
         }
 
         #endregion
