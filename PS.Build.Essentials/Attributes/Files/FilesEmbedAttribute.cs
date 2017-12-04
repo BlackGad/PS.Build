@@ -44,15 +44,22 @@ namespace PS.Build.Essentials.Attributes
             var artifactory = provider.GetService<IArtifactory>();
             var namePrefix = macroResolver.Resolve(NamePrefix ?? string.Empty);
             logger.Info(files.Any() ? $"There is {files.Length} files to embed:" : "There is no files to embed");
-
             foreach (var file in files)
             {
+                logger.Info($"* Embed: {file.Original}");
+
                 var artifact = artifactory.Artifact(file.Original, BuildItem.EmbeddedResource)
                                           .Permanent();
 
-                if (!string.IsNullOrWhiteSpace(namePrefix) && !string.IsNullOrWhiteSpace(file.Recursive))
+                if (!string.IsNullOrWhiteSpace(namePrefix) && file.Recursive != null)
                 {
-                    artifact.Metadata("Link", Path.Combine(namePrefix, file.Recursive, file.Postfix));
+                    var link = Path.Combine(namePrefix, file.Recursive, file.Postfix);
+                    using (logger.IndentMessages())
+                    {
+                        logger.Debug($"- Link: {link}");
+                    }
+
+                    artifact.Metadata("Link", link);
                 }
 
                 artifact.Dependencies().FileDependency(file.Original);
