@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -29,22 +27,22 @@ namespace PS.Build.Tasks
         public override bool Execute()
         {
             var logger = new Logger(Log);
-            
+
             var sandbox = BuildEngine4.GetRegisteredTaskObject(BuildEngine.ProjectFileOfTaskNode, RegisteredTaskObjectLifetime.Build) as Sanbox;
             if (sandbox == null) return true;
 
             CompilesToAdd = Enumerable.Empty<ITaskItem>().ToArray();
             CompilesToRemove = Enumerable.Empty<ITaskItem>().ToArray();
-            if(Assembly.GetEntryAssembly() == null) return true;
+            if (Assembly.GetEntryAssembly() == null) return true;
 
             try
             {
                 var replacements = sandbox.Client.ReplaceCompileItems(logger);
                 Func<CompileItemReplacement, ITaskItem> selector = r =>
                 {
-                    return ItemsCompile.First(c => string.Equals(c.GetMetadata("FullPath"),
-                                                                 r.Source,
-                                                                 StringComparison.InvariantCultureIgnoreCase));
+                    return ItemsCompile.FirstOrDefault(c => string.Equals(c.GetMetadata("FullPath"),
+                                                                          r.Source,
+                                                                          StringComparison.InvariantCultureIgnoreCase));
                 };
 
                 CompilesToAdd = replacements.Select(r => new TaskItem(r.Target)).OfType<ITaskItem>().ToArray();
