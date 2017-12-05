@@ -11,6 +11,8 @@ namespace PS.Build.Tasks
     {
         #region Properties
 
+        public bool Test { get; set; }
+
         [Output]
         public ITaskItem[] CompilesToAdd { get; private set; }
 
@@ -33,7 +35,7 @@ namespace PS.Build.Tasks
 
             CompilesToAdd = Enumerable.Empty<ITaskItem>().ToArray();
             CompilesToRemove = Enumerable.Empty<ITaskItem>().ToArray();
-            if (Assembly.GetEntryAssembly() == null) return true;
+            if (!Test && Assembly.GetEntryAssembly() == null) return true;
 
             try
             {

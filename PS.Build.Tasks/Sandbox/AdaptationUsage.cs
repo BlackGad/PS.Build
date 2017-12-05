@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
@@ -71,8 +70,10 @@ namespace PS.Build.Tasks
                                SyntaxNode associatedSyntaxNode,
                                AttributeData attributeData,
                                AttributeTargets attributeTargets,
-                               Type type)
+                               Type type,
+                               bool escaped)
         {
+            Escaped = escaped;
             SemanticModel = semanticModel;
             SyntaxTree = syntaxTree;
             AssociatedSyntaxNode = associatedSyntaxNode;
@@ -93,6 +94,9 @@ namespace PS.Build.Tasks
         public Attribute Attribute { get; set; }
         public AttributeData AttributeData { get; }
         public AttributeTargets AttributeTargets { get; }
+
+        public bool Escaped { get; }
+
         public MethodInfo PostBuildMethod { get; }
 
         public MethodInfo PreBuildMethod { get; }

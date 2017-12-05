@@ -50,5 +50,12 @@ namespace PS.Build.Types
         ///     Target framework is the particular version of the .NET Framework that your project is built to run on.
         /// </summary>
         TargetFrameworkVersion,
+
+        /// <summary>
+        ///     Defines conditional compiler constants. Symbol/value pairs are separated by semicolons and are specified by using
+        ///     the following syntax: symbol1 = value1; symbol2 = value2
+        ///     The property is equivalent to the /define compiler switch.
+        /// </summary>
+        DefineConstants
     }
 }

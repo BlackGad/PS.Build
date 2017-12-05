@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,15 +14,20 @@ namespace PS.Build.Tasks
 
         #region Constructors
 
-        public SuspiciousAttributeVisitor(IEnumerable<Type> adaptationTypes)
+        public SuspiciousAttributeVisitor(IEnumerable<Type> adaptationTypes) : base(true)
         {
             SuspiciousAttributeSyntaxes = new SuspiciousAttributeSyntaxes();
             _associationMap = adaptationTypes.CreateAssociationMap();
+            IsChanged = new ManualResetEvent(false);
         }
 
         #endregion
 
         #region Properties
+
+        public int AdaptationRegionEntries { get; set; }
+
+        public ManualResetEvent IsChanged { get; }
 
         public SuspiciousAttributeSyntaxes SuspiciousAttributeSyntaxes { get; }
 
@@ -34,7 +40,10 @@ namespace PS.Build.Tasks
             var result = (AttributeSyntax)base.VisitAttribute(node);
             var attributeClass = result.Name.ToFullString();
             if (_associationMap.ContainsKey(attributeClass))
-                SuspiciousAttributeSyntaxes.Add(result, _associationMap[attributeClass]);
+            {
+                SuspiciousAttributeSyntaxes.Manage(result, _associationMap[attributeClass]);
+                IsChanged.Set();
+            }
             return result;
         }
 

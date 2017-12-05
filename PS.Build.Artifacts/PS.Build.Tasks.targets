@@ -51,6 +51,7 @@
 			PropertyConfiguration="$(Configuration)"
 			PropertyRootNamespace="$(RootNamespace)"
 			PropertyTargetFrameworkVersion="$(TargetFrameworkVersion)"
+			PropertyDefineConstants="$(DefineConstants)"
 
 			DirectoryIntermediate="$(IntermediateOutputPath)"
 			DirectoryProject="$(MSBuildProjectDirectory)"

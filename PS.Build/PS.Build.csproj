@@ -37,6 +37,7 @@
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="Extensions\FluentExtensions.cs" />
     <Compile Include="Extensions\IOExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Services\IArtifactory.cs" />
     <Compile Include="Services\IExplorer.cs" />

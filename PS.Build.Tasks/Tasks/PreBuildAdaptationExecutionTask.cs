@@ -6,10 +6,9 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using PS.Build.Tasks.Extensions;
+using PS.Build.Extensions;
 using PS.Build.Tasks.Services;
 using PS.Build.Types;
-using PS.Build.Extensions;
 using Logger = PS.Build.Tasks.Services.Logger;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -145,6 +144,9 @@ namespace PS.Build.Tasks
 
         [Required]
         public string PropertyConfiguration { get; set; }
+
+        [Required]
+        public string PropertyDefineConstants { get; set; }
 
         [Required]
         public string PropertyPlatform { get; set; }

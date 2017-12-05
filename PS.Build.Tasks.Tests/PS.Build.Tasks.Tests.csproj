@@ -177,6 +177,7 @@
     <Compile Include="Common\MsBuildLogger.cs" />
     <Compile Include="Tests\Tasks\BuildAdaptationExecutionTaskTests.cs" />
     <Compile Include="Tests\Tasks\CustomAttributeCreationTests.cs" />
+    <Compile Include="Tests\Tasks\SourceCodeIsolationTests.cs" />
     <Compile Include="Tests\Tasks\SetupTests.cs" />
     <Compile Include="Tests\Tasks\MacroResolverTests.cs" />
     <Compile Include="Tests\Tasks\DynamicVaultTests.cs" />

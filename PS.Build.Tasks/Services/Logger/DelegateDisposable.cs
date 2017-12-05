@@ -2,7 +2,8 @@
 
 namespace PS.Build.Tasks.Services
 {
-    internal class DelegateDisposable : IDisposable
+    internal class DelegateDisposable : MarshalByRefObject,
+                                        IDisposable
     {
         private readonly Action _action;
 
