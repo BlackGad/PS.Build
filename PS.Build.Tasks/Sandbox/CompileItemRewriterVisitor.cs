@@ -12,7 +12,7 @@ namespace PS.Build.Tasks
 
         #region Constructors
 
-        public CompileItemRewriterVisitor(IEnumerable<AdaptationUsage> usages)
+        public CompileItemRewriterVisitor(IEnumerable<AdaptationUsage> usages) : base(true)
         {
             _usages = usages.ToArray();
         }
@@ -25,12 +25,6 @@ namespace PS.Build.Tasks
         {
             if (_usages.Any(u => u.AttributeData.ApplicationSyntaxReference.Span.Start == node.SpanStart)) return null;
             return base.VisitAttribute(node);
-        }
-
-        public override SyntaxNode VisitAttributeList(AttributeListSyntax node)
-        {
-            var result = (AttributeListSyntax)base.VisitAttributeList(node);
-            return result.Attributes.Any() ? result : null;
         }
 
         #endregion

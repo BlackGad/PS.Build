@@ -41,20 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\Files\CopyAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupBaseActionAttribute.cs" />
-    <Compile Include="Attributes\Files\MoveAttribute.cs" />
-    <Compile Include="Attributes\Files\RemoveAttribute.cs" />
+    <Compile Include="Attributes\Files\FilesCopyAttribute.cs" />
+    <Compile Include="Attributes\Files\FilesBaseAttribute.cs" />
+    <Compile Include="Attributes\Files\FilesEmbedAttribute.cs" />
+    <Compile Include="Attributes\Files\FilesMoveAttribute.cs" />
+    <Compile Include="Attributes\Files\FilesRemoveAttribute.cs" />
     <Compile Include="Attributes\Files\Usage.cs" />
-    <Compile Include="Attributes\Files\Groups.cs" />
-    <Compile Include="Attributes\Files\GroupActionCopyAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupActionMoveAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupActionPackAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupActionRemoveAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupBaseAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupFilterAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupForkAttribute.cs" />
-    <Compile Include="Attributes\Files\GroupImportAttribute.cs" />
     <Compile Include="Attributes\ExecuteProcessAttribute.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -34,6 +34,7 @@ namespace PS.Build.Tasks.Tests.Common.Extensions
             preBuildTask.PropertyPlatform = project.Solution.Platform;
             preBuildTask.PropertyConfiguration = project.Solution.Configuration;
             preBuildTask.PropertyRootNamespace = xProject.Descendants(XName.Get("RootNamespace", msbuildNS)).FirstOrDefault()?.Value;
+            preBuildTask.PropertyDefineConstants = xProject.Descendants(XName.Get("DefineConstants", msbuildNS)).FirstOrDefault()?.Value;
 
             preBuildTask.DirectoryIntermediate = "obj\\" + project.Solution.Configuration;
             preBuildTask.DirectoryProject = usageProjectDirectory;

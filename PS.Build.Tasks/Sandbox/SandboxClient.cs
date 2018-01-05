@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -120,7 +120,7 @@ namespace PS.Build.Tasks
                 return result.ToArray();
             }
 
-            _compilation = CreateCompilation(syntaxTrees, logger);
+            _compilation = CreateCompilation(syntaxTrees.Select(t => t.Item2), logger);
             if (_compilation == null) throw new Exception("Can not create compilation");
 
             _usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, _compilation, logger);
@@ -178,20 +178,38 @@ namespace PS.Build.Tasks
             logger.Debug("------------");
             logger.Info("Replacing source code files which contains adaptation usages");
 
-            var projectDirectory = _explorer.Directories[BuildDirectory.Project];
             var intermediateDirectory = _explorer.Directories[BuildDirectory.Intermediate];
 
-            var grouppedUsages = _usages.ToLookup(u => u.SyntaxTree.FilePath, u => u);
-            logger.Info($"{grouppedUsages.Count} files will be replaced");
+            var groupedUsages = _usages.Enumerate().ToLookup(u => u.SyntaxTree.FilePath, u => u);
+            logger.Info($"{groupedUsages.Count(g => g.Any(u => !u.Escaped))} files will be replaced");
 
-            //Debugger.Launch();
+            var pattern = @"\[(assembly:)?(module:)?\s*\]";
+            var options = RegexOptions.IgnorePatternWhitespace;
+            var regex = new Regex(pattern, options);
 
-            foreach (var group in grouppedUsages)
+            foreach (var group in groupedUsages)
             {
                 var sourceFile = group.Key;
 
-                //if (sourceFile.StartsWith(projectDirectory, StringComparison.InvariantCultureIgnoreCase))
-                //    sourceFile = sourceFile.Substring(projectDirectory.Length);
+                if (group.All(u => u.Escaped))
+                {
+                    logger.Info($"All adaptation are isolated in {sourceFile} file");
+                    continue;
+                }
+
+                if (group.Any(u => u.Escaped))
+                {
+                    var warnMessage = $"Mixed isolation detected in {sourceFile} file. Unescaped adaptations:" + Environment.NewLine;
+                    foreach (var unescapedSyntax in group.Where(u => !u.Escaped))
+                    {
+                        var location = unescapedSyntax.SyntaxTree
+                                                      .GetMappedLineSpan(unescapedSyntax.AttributeData.ApplicationSyntaxReference.Span)
+                                                      .Span;
+                        warnMessage += $"  Position {location}: {unescapedSyntax.AttributeData}{Environment.NewLine}";
+                    }
+
+                    logger.Warn(warnMessage);
+                }
 
                 var replacedFile = Path.Combine(intermediateDirectory, "__replacements", sourceFile.GetMD5Hash() + ".cs");
 
@@ -207,7 +225,10 @@ namespace PS.Build.Tasks
                     var rewrittenItem = visitor.Visit(syntaxTree.GetRoot());
 
                     Path.GetDirectoryName(replacedFile)?.EnsureDirectoryExist();
-                    File.WriteAllText(replacedFile, rewrittenItem.ToFullString());
+                    var replacedFileContent = rewrittenItem.ToFullString();
+                    replacedFileContent = regex.Replace(replacedFileContent, string.Empty);
+
+                    File.WriteAllText(replacedFile, replacedFileContent);
 
                     var replacement = new CompileItemReplacement
                     {
@@ -233,33 +254,34 @@ namespace PS.Build.Tasks
             logger.Debug("------------");
             logger.Info("Analyzing semantic");
 
-            var suspiciousSyntaxTrees = suspiciousAttributeSyntaxes.ToLookup(pair => pair.Key.SyntaxTree, pair => pair);
+            var suspiciousSyntaxTrees = suspiciousAttributeSyntaxes.ToLookup(pair => pair.Syntax.SyntaxTree, pair => pair);
             var usages = new List<AdaptationUsage>();
             foreach (var group in suspiciousSyntaxTrees)
             {
                 var semanticModel = compilation.GetSemanticModel(group.Key, true);
 
-                foreach (var pair in group)
+                foreach (var syntax in group)
                 {
                     try
                     {
-                        var attributeInfo = semanticModel.GetSymbolInfo(pair.Key);
+                        var attributeInfo = semanticModel.GetSymbolInfo(syntax.Syntax);
                         var symbol = attributeInfo.Symbol ?? attributeInfo.CandidateSymbols.FirstOrDefault();
                         if (symbol == null) continue;
 
-                        var resolvedType = pair.Value.FirstOrDefault(t => symbol.ResolveType() == t);
-                        var attributeData = pair.Key.ResolveAttributeData(semanticModel);
-                        if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{pair.Key}' type");
+                        var resolvedType = syntax.PossibleTypes.FirstOrDefault(t => symbol.ResolveType() == t);
+                        var attributeData = syntax.Syntax.ResolveAttributeData(semanticModel);
+                        if (resolvedType == null) throw new InvalidDataException($"Could not resolve '{syntax.Syntax}' type");
                         if (attributeData?.Item2 == null) throw new InvalidDataException("Could not resolve attribute semantic");
                         if (attributeData.Item1 == AttributeTargets.All)
                             throw new InvalidOperationException("Unexpected AttributeTargets in resolved attribute data");
 
                         usages.Add(new AdaptationUsage(semanticModel,
                                                        group.Key,
-                                                       pair.Key.Parent.Parent,
+                                                       syntax.Syntax.Parent.Parent,
                                                        attributeData.Item2,
                                                        attributeData.Item1,
-                                                       resolvedType));
+                                                       resolvedType,
+                                                       syntax.Escaped));
                     }
                     catch (NotSupportedException e)
                     {
@@ -281,7 +303,7 @@ namespace PS.Build.Tasks
         }
 
         private SuspiciousAttributeSyntaxes AnalyzeSyntaxForAdaptationUsages(IEnumerable<Type> adaptationTypes,
-                                                                             IEnumerable<SyntaxTree> syntaxTrees,
+                                                                             IEnumerable<Tuple<SyntaxTree, SyntaxTree>> syntaxTrees,
                                                                              ILogger logger)
         {
             logger.Debug("------------");
@@ -290,18 +312,29 @@ namespace PS.Build.Tasks
             var visitor = new SuspiciousAttributeVisitor(adaptationTypes);
             foreach (var syntaxTree in syntaxTrees)
             {
-                visitor.Visit(syntaxTree.GetRoot());
+                visitor.IsChanged.Reset();
+                visitor.Visit(syntaxTree.Item2.GetRoot());
+                if (visitor.IsChanged.WaitOne(0))
+                {
+                    logger.Debug("Suspicious attributes isolation test");
+                    visitor.Visit(syntaxTree.Item1.GetRoot());
+                }
             }
 
             var suspiciousAttributeSyntaxes = visitor.SuspiciousAttributeSyntaxes;
             logger.Info($"Found {suspiciousAttributeSyntaxes.Count} suspicious attributes");
-            foreach (var pair in suspiciousAttributeSyntaxes)
+            foreach (var syntax in suspiciousAttributeSyntaxes)
             {
-                logger.Debug($" + Syntax: {pair.Key}");
-                logger.Debug($"   Location: {pair.Key.GetLocation()}");
-                foreach (var type in pair.Value)
+                logger.Debug($"+ Syntax: {syntax.Syntax}");
+                using (logger.IndentMessages())
                 {
-                    logger.Debug($"   * Could be: {type.FullName}");
+                    logger.Debug($"Escaped: {syntax.Escaped}");
+                    logger.Debug($"Location: {syntax.Syntax.GetLocation()}");
+                    foreach (var type in syntax.PossibleTypes)
+                    {
+                        using (logger.IndentMessages())
+                            logger.Debug($"* Could be: {type.FullName}");
+                    }
                 }
             }
 
@@ -317,14 +350,24 @@ namespace PS.Build.Tasks
             return CSharpCompilation.Create(Guid.NewGuid().ToString("N"), syntaxTrees, references);
         }
 
-        private List<SyntaxTree> CreateSyntaxTrees()
+        private List<Tuple<SyntaxTree, SyntaxTree>> CreateSyntaxTrees()
         {
             var syntaxTrees = _explorer.Items[BuildItem.Compile].Select(r =>
             {
                 var text = File.ReadAllText(r.FullPath);
-                return CSharpSyntaxTree.ParseText(text,
-                                                  path: r.FullPath,
-                                                  options: new CSharpParseOptions(preprocessorSymbols: new[] { "DEBUG", "ADAPTATION" }));
+
+                var symbols = GetBuildConstants().ToList();
+
+                var treeWithoutEscapes = CSharpSyntaxTree.ParseText(text,
+                                                                    path: r.FullPath,
+                                                                    options: new CSharpParseOptions(preprocessorSymbols: symbols));
+
+                symbols.Add("ADAPTATION");
+                var treeWithEscapes = CSharpSyntaxTree.ParseText(text,
+                                                                 path: r.FullPath,
+                                                                 options: new CSharpParseOptions(preprocessorSymbols: symbols));
+
+                return new Tuple<SyntaxTree, SyntaxTree>(treeWithoutEscapes, treeWithEscapes);
             }).ToList();
             return syntaxTrees;
         }
@@ -449,6 +492,12 @@ namespace PS.Build.Tasks
                 }
             }
             return result;
+        }
+
+        private string[] GetBuildConstants()
+        {
+            var constants = _explorer.Properties[BuildProperty.DefineConstants] ?? string.Empty;
+            return constants.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         private void HandleArtifactsContent(List<Artifact> artifacts, CacheManager<ArtifactCache> cacheManager, ILogger logger)

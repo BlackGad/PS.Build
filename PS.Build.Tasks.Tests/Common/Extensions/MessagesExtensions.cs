@@ -27,11 +27,16 @@ namespace PS.Build.Tasks.Tests.Common.Extensions
             return Enumerable.Empty<string>();
         }
 
-        public static IEnumerable<string> AssertEmpty(this IEnumerable<LazyFormattedBuildEventArgs> collection)
+        public static IEnumerable<string> AssertCount(this IEnumerable<LazyFormattedBuildEventArgs> collection, int count)
         {
             var postErrors = collection.Enumerate().Select(m => m.Message).ToList();
-            if (postErrors.Any()) return postErrors;
+            if (postErrors.Count != count) return postErrors;
             return Enumerable.Empty<string>();
+        }
+
+        public static IEnumerable<string> AssertEmpty(this IEnumerable<LazyFormattedBuildEventArgs> collection)
+        {
+            return collection.AssertCount(0);
         }
 
         #endregion

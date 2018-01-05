@@ -79,7 +79,8 @@ namespace PS.Build.Tasks
             if (File.Exists(expectedAssemblyPath)) resolvedPath = expectedAssemblyPath;
             else
             {
-                var versions = IOExtensions.EnumerateDirectories(expectedAssemblyDirectory + "\\*")
+                var versions = IOExtensions.SearchDirectories(expectedAssemblyDirectory + "\\*")
+                                           .Items
                                            .Select(d =>
                                            {
                                                d = d.TrimEnd('\\');
