@@ -16,6 +16,7 @@
     <files>
         <file src="bin\Release\*.dll" target="tasks\MSBuild" />
         <file src="bin\Release\*.pdb" target="tasks\MSBuild" />
+        <file src="bin\Release\*.config" target="tasks\MSBuild" />
         <file src="Nuget\**\*.*" target="." />
     </files>
 </package>
