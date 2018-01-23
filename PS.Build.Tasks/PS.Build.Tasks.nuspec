@@ -14,6 +14,8 @@
         <tags>PS.Build MSBuild Roslyn</tags>      
     </metadata>
     <files>
+        <file src="bin\Release\*.dll" target="tasks\MSBuild" />
+        <file src="bin\Release\*.pdb" target="tasks\MSBuild" />
         <file src="Nuget\**\*.*" target="." />
     </files>
 </package>
