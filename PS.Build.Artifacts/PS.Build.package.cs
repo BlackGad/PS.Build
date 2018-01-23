@@ -1,6 +1,6 @@
 ﻿using PS.Build.Nuget.Attributes;
 
-#if DEBUG
+#if ADAPTATION
 
 [assembly: Nuget(Title = "PS.Build API", ID = "PS.Build")]
 [assembly: Nuget(Description = "Public API for PS.Build adaptation toolchain", ID = "PS.Build")]

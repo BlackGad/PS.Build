@@ -1,7 +1,5 @@
 ﻿using PS.Build.Nuget.Attributes;
 
-#if DEBUG
-
 [assembly: Nuget(Title = "PS.Build Engine", ID = "PS.Build.Tasks")]
 [assembly: Nuget(Description = "PS.Build adaptation toolchain engine", ID = "PS.Build.Tasks")]
 [assembly: Nuget(Copyright = "Copyright © Vladimir Shkolka, 2017", ID = "PS.Build.Tasks")]
@@ -19,5 +17,3 @@
 
 [assembly: NugetBuild(@"{dir.solution}_Artifacts\{prop.configuration}.{prop.platform}", ID = "PS.Build.Tasks")]
 [assembly: NugetDebugSubstitution(ID = "PS.Build.Tasks")]
-
-#endif

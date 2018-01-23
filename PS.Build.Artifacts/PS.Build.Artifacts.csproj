@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.props" Condition="Exists('..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.props')" />
+  <Import Project="..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.props" Condition="Exists('..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -41,24 +41,24 @@
       <HintPath>..\packages\NuGet.Client.4.2.0\lib\net45\NuGet.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Common, Version=4.4.0.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Common.4.4.0\lib\net45\NuGet.Common.dll</HintPath>
+    <Reference Include="NuGet.Common, Version=4.5.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Common.4.5.0\lib\net45\NuGet.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NuGet.ContentModel, Version=4.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\NuGet.ContentModel.4.2.0\lib\net45\NuGet.ContentModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Frameworks, Version=4.4.0.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Frameworks.4.4.0\lib\net45\NuGet.Frameworks.dll</HintPath>
+    <Reference Include="NuGet.Frameworks, Version=4.5.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Frameworks.4.5.0\lib\net45\NuGet.Frameworks.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Packaging, Version=4.4.0.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Packaging.4.4.0\lib\net45\NuGet.Packaging.dll</HintPath>
+    <Reference Include="NuGet.Packaging, Version=4.5.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Packaging.4.5.0\lib\net45\NuGet.Packaging.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Packaging.Core, Version=4.4.0.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Packaging.Core.4.4.0\lib\net45\NuGet.Packaging.Core.dll</HintPath>
+    <Reference Include="NuGet.Packaging.Core, Version=4.5.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Packaging.Core.4.5.0\lib\net45\NuGet.Packaging.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NuGet.Packaging.Core.Types, Version=4.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -73,16 +73,12 @@
       <HintPath>..\packages\NuGet.RuntimeModel.4.2.0\lib\net45\NuGet.RuntimeModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NuGet.Versioning, Version=4.4.0.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\NuGet.Versioning.4.4.0\lib\net45\NuGet.Versioning.dll</HintPath>
+    <Reference Include="NuGet.Versioning, Version=4.5.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\NuGet.Versioning.4.5.0\lib\net45\NuGet.Versioning.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="PS.Build, Version=1.19.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PS.Build.1.19.0\lib\net452\PS.Build.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PS.Build.Nuget, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\PS.Build.Nuget.1.6.0\lib\net452\PS.Build.Nuget.dll</HintPath>
+    <Reference Include="PS.Build, Version=1.24.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PS.Build.1.24.0\lib\net452\PS.Build.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -113,8 +109,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="nuget.package.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -122,10 +116,10 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.props'))" />
-    <Error Condition="!Exists('..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.targets'))" />
+    <Error Condition="!Exists('..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.props'))" />
+    <Error Condition="!Exists('..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.targets'))" />
   </Target>
-  <Import Project="..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.targets" Condition="Exists('..\packages\PS.Build.Tasks.1.19.0\build\PS.Build.Tasks.targets')" />
+  <Import Project="..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.targets" Condition="Exists('..\packages\PS.Build.Tasks.1.24.0\build\PS.Build.Tasks.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

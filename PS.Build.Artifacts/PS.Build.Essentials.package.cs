@@ -1,6 +1,6 @@
 ﻿using PS.Build.Nuget.Attributes;
 
-#if DEBUG
+#if ADAPTATION
 
 [assembly: Nuget(Title = "PS.Build Essentials", ID = "PS.Build.Essentials")]
 [assembly: Nuget(Description = "Essential adaptations implementation for PS.Build adaptation toolchain", ID = "PS.Build.Essentials")]

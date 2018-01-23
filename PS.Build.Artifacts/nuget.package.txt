@@ -21,7 +21,6 @@ You can specify several nuget packages with unique ID in same project
 using PS.Build.Nuget.Attributes;
 
 //PS.Build runtime isolation: https://github.com/BlackGad/PS.Build#preprocessor-directives-isolation.
-#if DEBUG
 
 // USE AssemblyDescriptionAttribute instead
 //[assembly: Nuget(Description = "Some description")]
@@ -35,13 +34,10 @@ using PS.Build.Nuget.Attributes;
 [assembly: NugetBuild]
 [assembly: NugetDebugSubstitution]
 
-#endif
-
 *************************************************************************/
 using PS.Build.Nuget.Attributes;
 
 //PS.Build runtime isolation: https://github.com/BlackGad/PS.Build#preprocessor-directives-isolation.
-#if DEBUG
 
 // Setup main options for nuget package:
 // -------------------------|-------------------------------------------
@@ -107,5 +103,3 @@ using PS.Build.Nuget.Attributes;
 // By default it is solution folder).
 // Also you can specify generateTemplateFile option that will automatically create/modify configuration file and place there placeholder for specified NuGet package ID.
 [assembly: NugetDebugSubstitution]
-
-#endif
