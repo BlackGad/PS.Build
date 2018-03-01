@@ -38,15 +38,21 @@ namespace PS.Build.Tasks.Extensions
         public static object ExtractValue(this TypedConstant constant)
         {
             var arrayType = constant.Type as IArrayTypeSymbol;
-            if (arrayType == null) return constant.Value;
-
-            var elementType = arrayType.ElementType.ResolveType();
-            var array = Array.CreateInstance(elementType, constant.Values.Length);
-            for (var i = 0; i < constant.Values.Length; i++)
+            if (arrayType != null)
             {
-                array.SetValue(constant.Values[i].ExtractValue(), i);
+                var elementType = arrayType.ElementType.ResolveType();
+                var array = Array.CreateInstance(elementType, constant.Values.Length);
+                for (var i = 0; i < constant.Values.Length; i++)
+                {
+                    array.SetValue(constant.Values[i].ExtractValue(), i);
+                }
+                return array;
             }
-            return array;
+
+            if (constant.Kind == TypedConstantKind.Enum) return Enum.ToObject(constant.Type.ResolveType(), constant.Value);
+
+            return constant.Value;
+            
         }
 
         public static Tuple<AttributeTargets, AttributeData> ResolveAttributeData(this AttributeSyntax syntax, SemanticModel model)
