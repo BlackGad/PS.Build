@@ -102,74 +102,7 @@ namespace PS.Build.Tasks
 
         public SerializableArtifact[] ExecutePreBuildAdaptations(ILogger logger)
         {
-            var result = new List<SerializableArtifact>();
-
-            var adaptationTypes = SearchCompiledAdaptations(logger);
-            if (!adaptationTypes.Any())
-            {
-                logger.Info("Assembly references do not contains adaptation attributes.");
-                return result.ToArray();
-            }
-
-            var syntaxTrees = CreateSyntaxTrees();
-
-            var suspiciousAttributeSyntaxes = AnalyzeSyntaxForAdaptationUsages(adaptationTypes, syntaxTrees, logger);
-            if (!suspiciousAttributeSyntaxes.Any())
-            {
-                logger.Info("Assembly does not use any defined adaptation attribute.");
-                return result.ToArray();
-            }
-
-            _compilation = CreateCompilation(syntaxTrees.Select(t => t.Item2), logger);
-            if (_compilation == null) throw new Exception("Can not create compilation");
-
-            _usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, _compilation, logger);
-            if (!_usages.Any())
-            {
-                logger.Info("Assembly does not use any defined adaptation attribute.");
-                return result.ToArray();
-            }
-
-            var setupMethods = new List<MethodInfo>();
-            foreach (var usage in Sort(_usages))
-            {
-                setupMethods.AddRange(usage.SetupMethods);
-            }
-
-            if (setupMethods.Any())
-            {
-                logger.Info("Setup adaptations");
-                var calledMethods = new List<MethodInfo>();
-                foreach (var method in setupMethods)
-                {
-                    if (calledMethods.Contains(method)) continue;
-                    calledMethods.Add(method);
-
-                    logger.Info("------------");
-                    logger.Info($"Setup: {method.DeclaringType?.Name} type");
-
-                    var serviceProvider = new ServiceProvider();
-                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
-                    serviceProvider.AddService(typeof(IExplorer), _explorer);
-                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
-                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
-                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
-                    method.Invoke(null, new object[] { serviceProvider });
-                }
-            }
-
-            var artifacts = new List<Artifact>();
-            artifacts.AddRange(ExecutePreBuildAdaptations(_usages, logger));
-
-            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
-            {
-                HandleArtifactsContent(artifacts, cacheManager, logger);
-                artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
-            }
-
-            result.AddRange(artifacts.Select(a => a.Serialize()));
-
-            return result.ToArray();
+            return ExecutePreBuildAdaptationsInternal(logger);
         }
 
         public CompileItemReplacement[] ReplaceCompileItems(ILogger logger)
@@ -492,6 +425,79 @@ namespace PS.Build.Tasks
                 }
             }
             return result;
+        }
+
+        private SerializableArtifact[] ExecutePreBuildAdaptationsInternal(ILogger logger)
+        {
+            var result = new List<SerializableArtifact>();
+
+            var adaptationTypes = SearchCompiledAdaptations(logger);
+            if (!adaptationTypes.Any())
+            {
+                logger.Info("Assembly references do not contains adaptation attributes.");
+                return result.ToArray();
+            }
+
+            var syntaxTrees = CreateSyntaxTrees();
+
+            var suspiciousAttributeSyntaxes = AnalyzeSyntaxForAdaptationUsages(adaptationTypes, syntaxTrees, logger);
+            if (!suspiciousAttributeSyntaxes.Any())
+            {
+                logger.Info("Assembly does not use any defined adaptation attribute.");
+                return result.ToArray();
+            }
+
+            _compilation = CreateCompilation(syntaxTrees.Select(t => t.Item2), logger);
+            if (_compilation == null) throw new Exception("Can not create compilation");
+
+            _usages = AnalyzeSemanticForAdaptationUsages(suspiciousAttributeSyntaxes, _compilation, logger);
+
+            if (!_usages.Any())
+            {
+                logger.Info("Assembly does not use any defined adaptation attribute.");
+                return result.ToArray();
+            }
+
+            var setupMethods = new List<MethodInfo>();
+            foreach (var usage in Sort(_usages))
+            {
+                setupMethods.AddRange(usage.SetupMethods);
+            }
+
+            if (setupMethods.Any())
+            {
+                logger.Info("Setup adaptations");
+                var calledMethods = new List<MethodInfo>();
+                foreach (var method in setupMethods)
+                {
+                    if (calledMethods.Contains(method)) continue;
+                    calledMethods.Add(method);
+
+                    logger.Info("------------");
+                    logger.Info($"Setup: {method.DeclaringType?.Name} type");
+
+                    var serviceProvider = new ServiceProvider();
+                    serviceProvider.AddService(typeof(ILogger), new ScopeLogger(logger));
+                    serviceProvider.AddService(typeof(IExplorer), _explorer);
+                    serviceProvider.AddService(typeof(INugetExplorer), _nugetExplorer);
+                    serviceProvider.AddService(typeof(IDynamicVault), _dynamicVault);
+                    serviceProvider.AddService(typeof(IMacroResolver), _macroResolver);
+                    method.Invoke(null, new object[] { serviceProvider });
+                }
+            }
+
+            var artifacts = new List<Artifact>();
+            artifacts.AddRange(ExecutePreBuildAdaptations(_usages, logger));
+
+            using (var cacheManager = new CacheManager<ArtifactCache>(_explorer.Directories[BuildDirectory.Intermediate], logger))
+            {
+                HandleArtifactsContent(artifacts, cacheManager, logger);
+                artifacts.Add(new Artifact(cacheManager.GetCachePath(), BuildItem.Internal));
+            }
+
+            result.AddRange(artifacts.Select(a => a.Serialize()));
+
+            return result.ToArray();
         }
 
         private string[] GetBuildConstants()
