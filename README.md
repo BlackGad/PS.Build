@@ -9,11 +9,11 @@ Build process with [MSBuild](https://msdn.microsoft.com/en-us/library/0k6kkbsd.a
 ## Future
 First implementation showed its best and worst sides. 
 
-Plusses:
+### Plusses:
 * It really works :)
 
-Minuses:
-* Assembly isolation battlefield.
+### Minuses:
+* Assembly dependencies isolation battlefield. Cause really big issues in external adaptations.
 * Slows build process.
 
 Next step - rewrite assembly dependencies issolation. This will cause some functionality downgrade (source code processing with internal Roslyn components in adaptations, data sharing with vault service.). But it is necessary for future platform evolution.
