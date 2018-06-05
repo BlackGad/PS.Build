@@ -6,6 +6,16 @@
 
 Build process with [MSBuild](https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx) engine is powerful and simple. Current toolchain allows developer to extend and adapt his project build process using inline C# code via [Attributes](https://msdn.microsoft.com/en-us/library/aa288454(v=vs.71).aspx).
 
+## Future
+First implementation showed its best and worst sides. 
+Plusses:
+* It really works :)
+Minuses:
+* Assembly isolation battlefield.
+* Slows build process.
+
+Next step - rewrite assembly dependencies issolation. This will cause some functionality downgrade (source code processing with internal Roslyn components in adaptations, data sharing with vault service.). But it is necessary for future platform evolution.
+
 ## Known adaptations
 * [NuGet](https://github.com/BlackGad/PS.Build.Nuget) - NuGet stuff via attributes 
 
