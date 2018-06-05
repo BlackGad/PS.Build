@@ -8,8 +8,10 @@ Build process with [MSBuild](https://msdn.microsoft.com/en-us/library/0k6kkbsd.a
 
 ## Future
 First implementation showed its best and worst sides. 
+
 Plusses:
 * It really works :)
+
 Minuses:
 * Assembly isolation battlefield.
 * Slows build process.
